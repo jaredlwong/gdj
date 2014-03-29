@@ -10,7 +10,12 @@
 #define IS(name,val)    symbis(name,val,jt->local)
 
 typedef TA(*TAF)();
-typedef struct{I c[4];AF f;TAF vf;I b,e,k;} PT;
+typedef struct {
+	I c[4];
+	AF f;
+	TAF vf;
+	I b, e, k;
+} PT;
 
 /* c:  4-patterns for AT(x) of top 4 parser stack elements      */
 /* f:  action                                                   */
@@ -37,4 +42,5 @@ extern ACTION(jtdyad);
 extern ACTION(jtis);
 extern ACTION(jtmonad);
 extern ACTION(jtpunc);
+
 

@@ -15,7 +15,7 @@
 /* EMIN:   smallest number where 0<^EMIN; _1074*^.2     */
 /* EMAX2:  largest  number where _>cosh EMAX2; EMAX+^.2 */
 /* TMAX:   smallest number where 1=tanh TMAX            */
-                   
+
 #define ZF1DECL         Z z;D zr=0.0,zi=0.0,a=v.re,b=v.im
 #define ZF2DECL         Z z;D zr=0.0,zi=0.0,a=u.re,b=u.im,c=v.re,d=v.im
 #define ZEPILOG         z.re=zr; z.im=zi; R z
@@ -56,8 +56,9 @@ extern ZF2(jtzpow);
 extern ZF2(jtzrem);
 extern ZF2(jtztymes);
 
-extern B jtzeq(J,Z,Z);
-extern B jtztridiag(J,I,A,A);
+extern B jtzeq(J, Z, Z);
+extern B jtztridiag(J, I, A, A);
 
 extern D zmag(Z);
 extern Z zrj0(D);
+

@@ -6,15 +6,15 @@
 #include "j.h"
 
 
-I ptab[]={
-       53,       113,       241,       499,     1013, 
-     2029,      4079,      8179,     16369,    32749, 
-    65521,    131059,    262133,    524269,  1048559, 
-  2097133,   4194287,   8388593,  16777199, 33554393, 
- 67108837, 134217689, 268435399, 536870879
+I ptab[] = {
+	53,       113,       241,       499,     1013,
+	2029,      4079,      8179,     16369,    32749,
+	65521,    131059,    262133,    524269,  1048559,
+	2097133,   4194287,   8388593,  16777199, 33554393,
+	67108837, 134217689, 268435399, 536870879
 };
 
-I nptab=sizeof(ptab)/SZI;
+I nptab = sizeof(ptab) / SZI;
 
 /* Floating point (type D) byte order:               */
 /* Archimedes              3 2 1 0 7 6 5 4           */
@@ -32,16 +32,30 @@ I nptab=sizeof(ptab)/SZI;
 #define LSW 1
 #endif
 
-static void ctmask(J jt){DI p,x,y;UINT c,d,e,m,q;
- p.d=PI;                      /* pi itself                */
- x.d=PI*(1-jt->ct);           /* lower bound              */
- y.d=PI/(1-jt->ct);           /* upper bound              */
- c=p.i[MSW]; d=p.i[LSW]; m=0;
- if(c==x.i[MSW]){e=x.i[LSW]; m =(d&~e)|(~d&e);}
- if(c==y.i[MSW]){e=y.i[LSW]; m|=(d&~e)|(~d&e);}
- q=m;
- while(m){m>>=1; q|=m;}       /* q=:+./\m as a bit vector */
- jt->ctmask=~(UI)q;
+static void ctmask(J jt)
+{
+	DI p, x, y;
+	UINT c, d, e, m, q;
+	p.d = PI;                    /* pi itself                */
+	x.d = PI * (1 - jt->ct);     /* lower bound              */
+	y.d = PI / (1 - jt->ct);     /* upper bound              */
+	c = p.i[MSW];
+	d = p.i[LSW];
+	m = 0;
+	if(c == x.i[MSW]) {
+		e = x.i[LSW];
+		m = (d & ~e) | (~d & e);
+	}
+	if(c == y.i[MSW]) {
+		e = y.i[LSW];
+		m |= (d & ~e) | (~d & e);
+	}
+	q = m;
+	while(m) {
+		m >>= 1;    /* q=:+./\m as a bit vector */
+		q |= m;
+	}
+	jt->ctmask = ~(UI)q;
 }    /* 1 iff significant wrt comparison tolerance */
 
 
@@ -50,64 +64,165 @@ static void ctmask(J jt){DI p,x,y;UINT c,d,e,m,q;
 /* hic2: hash the low order bytes of a string of length k (k even) */
 /* hicw: hash a word (32 bit or 64 bit depending on CPU)           */
 
-       UI hic (     I k,UC*v){UI z=0;             DO(k,       z=(i+1000003)**v++   ^z<<1;      ); R z;}
+UI hic (     I k, UC*v)
+{
+	UI z = 0;
+	DO(k,       z = (i + 1000003)**v++   ^z << 1;      );
+	R z;
+}
 
-static UI hicnz(    I k,UC*v){UI z=0;UC c;        DO(k, c=*v++; if(c&&c!=255)z=(i+1000003)*c^z<<1;); R z;}
+static UI hicnz(    I k, UC*v)
+{
+	UI z = 0;
+	UC c;
+	DO(k, c = *v++; if(c && c != 255)z = (i + 1000003) * c ^ z << 1;);
+	R z;
+}
 
-static UI hicx(J jt,I k,UC*v){UI z=0;I*u=jt->hiv; DO(jt->hin, z=(i+1000003)*v[*u++]^z<<1;      ); R z;}
+static UI hicx(J jt, I k, UC*v)
+{
+	UI z = 0;
+	I*u = jt->hiv;
+	DO(jt->hin, z = (i + 1000003) * v[*u++] ^ z << 1;      );
+	R z;
+}
 
 #if SYS & SYS_LILENDIAN
-       UI hic2(     I k,UC*v){UI z=0;             DO(k/2,     z=(i+1000003)**v     ^z<<1; v+=2;); R z;}
+UI hic2(     I k, UC*v)
+{
+	UI z = 0;
+	DO(k / 2,     z = (i + 1000003)**v     ^ z << 1; v += 2;);
+	R z;
+}
 #else
-       UI hic2(     I k,UC*v){UI z=0; ++v;        DO(k/2,     z=(i+1000003)**v     ^z<<1; v+=2;); R z;}
+UI hic2(     I k, UC*v)
+{
+	UI z = 0;
+	++v;
+	DO(k / 2,     z = (i + 1000003)**v     ^ z << 1; v += 2;);
+	R z;
+}
 #endif
 
 #if SY_64
 #define hicw(v)  (10495464745870458733U**(UI*)(v))
-static UI jthid(J jt,D d){R 10495464745870458733U*(jt->ctmask&*(I*)&d);}
+static UI jthid(J jt, D d)
+{
+	R 10495464745870458733U * (jt->ctmask&*(I*)&d);
+}
 #else
 #define hicw(v)  (2838338383U**(U*)(v))
-static UI jthid(J jt,D d){DI x; x.d=d; R 888888883U*(x.i[LSW]&jt->ctmask)+2838338383U*x.i[MSW];}
+static UI jthid(J jt, D d)
+{
+	DI x;
+	x.d = d;
+	R 888888883U * (x.i[LSW]&jt->ctmask) + 2838338383U * x.i[MSW];
+}
 #endif
 
 
-static UI jthia(J jt,D hct,A y){UC*yv;D d;I n,t;Q*u;
- n=AN(y); t=AT(y); yv=UAV(y);
- if(!n||t&BOX)R hic(AR(y)*SZI,(UC*)AS(y));
- switch(t){
-  case LIT:  R hic(n,yv);
-  case C2T:  R hic2(2*n,yv);
-  case SBT:  R hic(n*SZI,yv);
-  case B01:  d=*(B*)yv; break;
-  case INT:  d=(D)*(I*)yv; break;
-  case FL: 
-  case CMPX: d=*(D*)yv; break;
-  case XNUM: d=xdouble(*(X*)yv); break;
-  case RAT:  u=(Q*)yv; d=xdouble(u->n)/xdouble(u->d);
- }
- R hid(d*hct);
+static UI jthia(J jt, D hct, A y)
+{
+	UC*yv;
+	D d;
+	I n, t;
+	Q*u;
+	n = AN(y);
+	t = AT(y);
+	yv = UAV(y);
+	if(!n || t & BOX) {
+		R hic(AR(y)*SZI, (UC*)AS(y));
+	}
+	switch(t) {
+	case LIT:
+		R hic(n, yv);
+	case C2T:
+		R hic2(2 * n, yv);
+	case SBT:
+		R hic(n * SZI, yv);
+	case B01:
+		d = *(B*)yv;
+		break;
+	case INT:
+		d = (D) * (I*)yv;
+		break;
+	case FL:
+	case CMPX:
+		d = *(D*)yv;
+		break;
+	case XNUM:
+		d = xdouble(*(X*)yv);
+		break;
+	case RAT:
+		u = (Q*)yv;
+		d = xdouble(u->n) / xdouble(u->d);
+	}
+	R hid(d * hct);
 }
 
-static UI jthiau(J jt,A y){I m,n;UC*v=UAV(y);UI z=2038074751;X*u,x;
- m=n=AN(y);
- if(!n)R 0;
- switch(AT(y)){
-  case RAT:  m+=n;  /* fall thru */
-  case XNUM: u=XAV(y); DO(m, x=*u++; v=UAV(x); z+=hicnz(AN(x)*SZI,UAV(x));); R z;
-  case INT:                                    z =hicnz(n    *SZI,UAV(y));   R z;
-  default:   R hic(n*bp(AT(y)),UAV(y));
-}}
+static UI jthiau(J jt, A y)
+{
+	I m, n;
+	UC*v = UAV(y);
+	UI z = 2038074751;
+	X*u, x;
+	m = n = AN(y);
+	if(!n) {
+		R 0;
+	}
+	switch(AT(y)) {
+	case RAT:
+		m += n; /* fall thru */
+	case XNUM:
+		u = XAV(y);
+		DO(m, x = *u++; v = UAV(x); z += hicnz(AN(x) * SZI, UAV(x)););
+		R z;
+	case INT:
+		z = hicnz(n    * SZI, UAV(y));
+		R z;
+	default:
+		R hic(n * bp(AT(y)), UAV(y));
+	}
+}
 
-static UI hix(X*v){A y=*v;   R hic(AN(y)*SZI,(UC*)AV(y));}
-static UI hiq(Q*v){A y=v->n; R hic(AN(y)*SZI,(UC*)AV(y));}
+static UI hix(X*v)
+{
+	A y = *v;
+	R hic(AN(y)*SZI, (UC*)AV(y));
+}
+static UI hiq(Q*v)
+{
+	A y = v->n;
+	R hic(AN(y)*SZI, (UC*)AV(y));
+}
 
 
-static B jteqx(J jt,I n,X*u,X*v){DO(n, if(!equ(*u,*v))R 0; ++u; ++v;); R 1;}
-static B jteqq(J jt,I n,Q*u,Q*v){DO(n, if(!QEQ(*u,*v))R 0; ++u; ++v;); R 1;}
-static B jteqd(J jt,I n,D*u,D*v){DO(n, if(!teq(*u,*v))R 0; ++u; ++v;); R 1;}
-static B jteqz(J jt,I n,Z*u,Z*v){DO(n, if(!zeq(*u,*v))R 0; ++u; ++v;); R 1;}
+static B jteqx(J jt, I n, X*u, X*v)
+{
+	DO(n, if(!equ(*u, *v))R 0; ++u; ++v;);
+	R 1;
+}
+static B jteqq(J jt, I n, Q*u, Q*v)
+{
+	DO(n, if(!QEQ(*u, *v))R 0; ++u; ++v;);
+	R 1;
+}
+static B jteqd(J jt, I n, D*u, D*v)
+{
+	DO(n, if(!teq(*u, *v))R 0; ++u; ++v;);
+	R 1;
+}
+static B jteqz(J jt, I n, Z*u, Z*v)
+{
+	DO(n, if(!zeq(*u, *v))R 0; ++u; ++v;);
+	R 1;
+}
 
-static B jteqa(J jt,I n,A*u,A*v,I c,I d){DO(n, if(!equ(AADR(c,*u),AADR(d,*v)))R 0; ++u; ++v;); R 1;}
+static B jteqa(J jt, I n, A*u, A*v, I c, I d)
+{
+	DO(n, if(!equ(AADR(c, *u), AADR(d, *v)))R 0; ++u; ++v;);
+	R 1;
+}
 
 /*
  mode one of the following:
@@ -118,14 +233,14 @@ static B jteqa(J jt,I n,A*u,A*v,I c,I d){DO(n, if(!equ(AADR(c,*u),AADR(d,*v)))R 
        4  ILESS      -.      a w
        5  INUBI      I.@~:     w
        6  IEPS       e.      a w rank
-       7  II0EPS     e.i.0:  a w   
+       7  II0EPS     e.i.0:  a w
        8  II1EPS     e.i.1:  a w
-       9  IJ0EPS     e.i:0:  a w  
+       9  IJ0EPS     e.i:0:  a w
        10 IJ1EPS     e.i:1:  a w
-       11 ISUMEPS    [:+ /e. a w     
-       12 IANYEPS    [:+./e. a w    
-       13 IALLEPS    [:*./e. a w    
-       14 IIFBEPS    I.@e.   a w    
+       11 ISUMEPS    [:+ /e. a w
+       12 IANYEPS    [:+./e. a w
+       13 IALLEPS    [:*./e. a w
+       14 IIFBEPS    I.@e.   a w
        30 IPHIDOT    i.      a w     prehashed
        31 IPHICO     i:      a w     prehashed
        34 IPHLESS    -.      a w     prehashed
@@ -202,13 +317,13 @@ static B jteqa(J jt,I n,A*u,A*v,I c,I d){DO(n, if(!equ(AADR(c,*u),AADR(d,*v)))R 
   R z;                                                                               \
  }
 
-static IOFX(A,jtioax1,hia(t1,AADR(d,*v)),!equ(AADR(d,*v),AADR(ad,av[hj])),++v,   --v  )  /* boxed exact 1-element item */   
-static IOFX(A,jtioau, hiau(AADR(d,*v)),  !equ(AADR(d,*v),AADR(ad,av[hj])),++v,   --v  )  /* boxed uniform type         */
-static IOFX(X,jtiox,  hix(v),            !eqx(n,v,av+n*hj),               v+=cn, v-=cn)  /* extended integer           */   
-static IOFX(Q,jtioq,  hiq(v),            !eqq(n,v,av+n*hj),               v+=cn, v-=cn)  /* rational number            */   
-static IOFX(C,jtioc,  hic(k,(UC*)v),     memcmp(v,av+k*hj,k),             v+=cn, v-=cn)  /* boolean, char, or integer  */
-static IOFX(C,jtiocx, hicx(jt,k,(UC*)v), memcmp(v,av+k*hj,k),             v+=cn, v-=cn)  /* boolean, char, or integer  */
-static IOFX(I,jtioi,  hicw(v),           *v!=av[hj],                      ++v,   --v  )
+static IOFX(A, jtioax1, hia(t1, AADR(d, *v)), !equ(AADR(d, *v), AADR(ad, av[hj])), ++v,   --v  ) /* boxed exact 1-element item */
+static IOFX(A, jtioau, hiau(AADR(d, *v)),  !equ(AADR(d, *v), AADR(ad, av[hj])), ++v,   --v  ) /* boxed uniform type         */
+static IOFX(X, jtiox,  hix(v),            !eqx(n, v, av + n*hj),               v += cn, v -= cn) /* extended integer           */
+static IOFX(Q, jtioq,  hiq(v),            !eqq(n, v, av + n*hj),               v += cn, v -= cn) /* rational number            */
+static IOFX(C, jtioc,  hic(k, (UC*)v),     memcmp(v, av + k*hj, k),             v += cn, v -= cn) /* boolean, char, or integer  */
+static IOFX(C, jtiocx, hicx(jt, k, (UC*)v), memcmp(v, av + k*hj, k),             v += cn, v -= cn) /* boolean, char, or integer  */
+static IOFX(I, jtioi,  hicw(v),           *v != av[hj],                      ++v,   --v  )
 
 
 #define HID(y)              (888888883U*y.i[LSW]+2838338383U*y.i[MSW])
@@ -220,7 +335,7 @@ static IOFX(I,jtioi,  hicw(v),           *v!=av[hj],                      ++v,  
  {x=*(D*)v;                                                                             \
   MASK(dl,x*tl);                j=              HID(dl)%pm; FIND(expw); il=ir=hj;       \
   MASK(dr,x*tr); if(dr.d!=dl.d){j=              HID(dr)%pm; FIND(expw);    ir=hj;}      \
- } 
+ }
 #define TFINDYY(expa,expw)  \
  {x=*(D*)v;                                                                             \
   MASK(dx,x   ); j=jx=HID(dx)%pm; jt->ct=0.0; FIND(expa); jt->ct=ct; if(m==hj)hv[j]=i;  \
@@ -296,12 +411,12 @@ static IOFX(I,jtioi,  hicw(v),           *v!=av[hj],                      ++v,  
   R z;                                                                                           \
  }
 
-static IOFT(Z,jtioz, THASHA, TFINDXY,TFINDYY,memcmp(v,av+n*hj,n*2*sizeof(D)), !eqz(n,v,av+n*hj)               )
-static IOFT(Z,jtioz1,THASHA, TFINDXY,TFINDYY,memcmp(v,av+n*hj,  2*sizeof(D)), !zeq( *v,av[hj] )               )
-static IOFT(D,jtiod, THASHA, TFINDXY,TFINDYY,memcmp(v,av+n*hj,n*  sizeof(D)), !eqd(n,v,av+n*hj)               )
-static IOFT(D,jtiod1,THASHA, TFINDXY,TFINDY1,x!=av[hj],                       !teq(x,av[hj] )                 )
-static IOFT(A,jtioa, THASHBX,TFINDBX,TFINDBX,!eqa(n,v,av+n*hj,d,ad),          !eqa(n,v,av+n*hj,d,ad)          )
-static IOFT(A,jtioa1,THASHBX,TFINDBX,TFINDBX,!equ(AADR(d,*v),AADR(ad,av[hj])),!equ(AADR(d,*v),AADR(ad,av[hj])))
+static IOFT(Z, jtioz, THASHA, TFINDXY, TFINDYY, memcmp(v, av + n*hj, n * 2 * sizeof(D)), !eqz(n, v, av + n*hj)               )
+static IOFT(Z, jtioz1, THASHA, TFINDXY, TFINDYY, memcmp(v, av + n*hj,  2 * sizeof(D)), !zeq( *v, av[hj] )               )
+static IOFT(D, jtiod, THASHA, TFINDXY, TFINDYY, memcmp(v, av + n*hj, n*  sizeof(D)), !eqd(n, v, av + n*hj)               )
+static IOFT(D, jtiod1, THASHA, TFINDXY, TFINDY1, x != av[hj],                       !teq(x, av[hj] )                 )
+static IOFT(A, jtioa, THASHBX, TFINDBX, TFINDBX, !eqa(n, v, av + n*hj, d, ad),          !eqa(n, v, av + n*hj, d, ad)          )
+static IOFT(A, jtioa1, THASHBX, TFINDBX, TFINDBX, !equ(AADR(d, *v), AADR(ad, av[hj])), !equ(AADR(d, *v), AADR(ad, av[hj])))
 
 
 #define SDO(v0)         if(mode<IPHOFFSET){B v1=!(v0); memset(hv,v0,p); u=av; DO(m, hb[*u++]=v1;);}
@@ -352,9 +467,9 @@ static IOFT(A,jtioa1,THASHBX,TFINDBX,TFINDBX,!equ(AADR(d,*v),AADR(ad,av[hj])),!e
   R z;                                                                                          \
  }
 
-static IOFSMALLRANGE(jtio1,UC,SCOZ, SCOW, SCOW, SCOWX,SCQW, SCQW )  /* 1-byte    items */
-static IOFSMALLRANGE(jtio2,US,SCOZ, SCOW, SCOW, SCOWX,SCQW, SCQW )  /* 2-byte    items */
-static IOFSMALLRANGE(jtio4,I ,SCOZ1,SCOW0,SCOW1,SCOW0,SCQW0,SCQW1)  /* word size items */
+static IOFSMALLRANGE(jtio1, UC, SCOZ, SCOW, SCOW, SCOWX, SCQW, SCQW ) /* 1-byte    items */
+static IOFSMALLRANGE(jtio2, US, SCOZ, SCOW, SCOW, SCOWX, SCQW, SCQW ) /* 2-byte    items */
+static IOFSMALLRANGE(jtio4, I , SCOZ1, SCOW0, SCOW1, SCOW0, SCQW0, SCQW1) /* word size items */
 
 
 #define SCDO(T,xe,exp)  \
@@ -365,42 +480,102 @@ static IOFSMALLRANGE(jtio4,I ,SCOZ1,SCOW0,SCOW1,SCOW0,SCQW0,SCQW1)  /* word size
    case IEPS:  DO(ac, DO(c, x=(xe); j=0;   while(m>j &&(exp))++j; *zb++=m>j;     wv+=q;); av+=p; if(1==wc)wv=v0;); break;  \
  }}
 
-static IOF(jtiosc){B*zb;I j,p,q,*u,*v,zn,*zv;
- p=1<ac?m:0; q=1<wc||1<c;
- zn=AN(z); 
- zv=AV(z); zb=(B*)zv; u=AV(a); v=AV(w); 
- switch(AT(a)){
-  default:                SCDO(C, *wv,x!=av[j]      ); break;
-  case C2T:               SCDO(S, *wv,x!=av[j]      ); break;
-  case CMPX:              SCDO(Z, *wv,!zeq(x, av[j])); break;
-  case XNUM:              SCDO(A, *wv,!equ(x, av[j])); break;
-  case RAT:               SCDO(Q, *wv,!QEQ(x, av[j])); break;
-  case INT:               SCDO(I, *wv,x!=av[j]      ); break;
-  case SBT:               SCDO(SB,*wv,x!=av[j]      ); break;
-  case BOX:  {RDECL;      SCDO(A, AADR(wd,*wv),!equ(x,AADR(ad,av[j])));} break;
-  case FL:   if(0==jt->ct)SCDO(D, *wv,x!=av[j]) 
-             else         SCDO(D, *wv,!teq(x,av[j]));
- }
- R z;
+static IOF(jtiosc)
+{
+	B*zb;
+	I j, p, q, *u, *v, zn, *zv;
+	p = 1 < ac ? m : 0;
+	q = 1 < wc || 1 < c;
+	zn = AN(z);
+	zv = AV(z);
+	zb = (B*)zv;
+	u = AV(a);
+	v = AV(w);
+	switch(AT(a)) {
+	default:
+		SCDO(C, *wv, x != av[j]      );
+		break;
+	case C2T:
+		SCDO(S, *wv, x != av[j]      );
+		break;
+	case CMPX:
+		SCDO(Z, *wv, !zeq(x, av[j]));
+		break;
+	case XNUM:
+		SCDO(A, *wv, !equ(x, av[j]));
+		break;
+	case RAT:
+		SCDO(Q, *wv, !QEQ(x, av[j]));
+		break;
+	case INT:
+		SCDO(I, *wv, x != av[j]      );
+		break;
+	case SBT:
+		SCDO(SB, *wv, x != av[j]      );
+		break;
+	case BOX:  {
+		RDECL;
+		SCDO(A, AADR(wd, *wv), !equ(x, AADR(ad, av[j])));
+	}
+	break;
+	case FL:
+		if(0 == jt->ct)SCDO(D, *wv, x != av[j])
+			else {
+				SCDO(D, *wv, !teq(x, av[j]));
+			}
+	}
+	R z;
 }    /* right argument cell is scalar; only for modes IIDOT IICO IEPS */
 
 
-static B jtusebs(J jt,A a,I ac,I m){A*av,x;I ad,t;
- if(!(BOX&AT(a)&&0==jt->ct))R 0;
- av=AAV(a); ad=(I)a*ARELATIVE(a);
- DO(ac*m, x=AVR(i); t=AT(x); if(t&BOX+CMPX||1<AN(x)&&t&NUMERIC)R 1;);
- R 0;
+static B jtusebs(J jt, A a, I ac, I m)
+{
+	A*av, x;
+	I ad, t;
+	if(!(BOX & AT(a) && 0 == jt->ct)) {
+		R 0;
+	}
+	av = AAV(a);
+	ad = (I)a * ARELATIVE(a);
+	DO(ac * m, x = AVR(i); t = AT(x); if(t & BOX + CMPX || 1 < AN(x) && t & NUMERIC)R 1;);
+	R 0;
 }    /* n (# elements in a target item) is assumed to be 1 */
 
-static A jtnodupgrade(J jt,A a,I acr,I ac,I acn,I ad,I n,I m,B b,B bk){A*av,h,*u,*v;I*hi,*hu,*hv,l,m1,q;
- RZ(h=irs1(a,0L,acr,jtgrade1)); hv=AV(h)+bk*(m-1); av=AAV(a);
- if(!b)for(l=0;l<ac;++l,av+=acn,hv+=m){
-  hi=hv; q=*hi; u=av+n*q;
-  if(bk){hu=--hi; DO(m-1, q=*hi--; v=av+n*q; if(!eqa(n,u,v,ad,ad)){u=v; *hu--=q;}); m1=hv-hu; if(m>m1)hv[1-m]=1-m1;}
-  else  {hu=++hi; DO(m-1, q=*hi++; v=av+n*q; if(!eqa(n,u,v,ad,ad)){u=v; *hu++=q;}); m1=hu-hv; if(m>m1)hv[m-1]=1-m1;}
- }
- R h;
-} 
+static A jtnodupgrade(J jt, A a, I acr, I ac, I acn, I ad, I n, I m, B b, B bk)
+{
+	A*av, h, *u, *v;
+	I*hi, *hu, *hv, l, m1, q;
+	RZ(h = irs1(a, 0L, acr, jtgrade1));
+	hv = AV(h) + bk * (m - 1);
+	av = AAV(a);
+	if(!b)for(l = 0; l < ac; ++l, av += acn, hv += m) {
+			hi = hv;
+			q = *hi;
+			u = av + n * q;
+			if(bk) {
+				hu = --hi;
+				DO(m - 1, q = *hi--; v = av + n * q; if(!eqa(n, u, v, ad, ad)) {
+				u = v;
+				*hu-- = q;
+			});
+				m1 = hv - hu;
+				if(m > m1) {
+					hv[1 - m] = 1 - m1;
+				}
+			} else  {
+				hu = ++hi;
+				DO(m - 1, q = *hi++; v = av + n * q; if(!eqa(n, u, v, ad, ad)) {
+				u = v;
+				*hu++ = q;
+			});
+				m1 = hu - hv;
+				if(m > m1) {
+					hv[m - 1] = 1 - m1;
+				}
+			}
+		}
+	R h;
+}
 
 #define BSLOOPAA(hiinc,zstmti,zstmt1,zstmt0)  \
  {A*u=av,*v;I*hi=hv,p,q;             \
@@ -423,257 +598,689 @@ static A jtnodupgrade(J jt,A a,I acr,I ac,I acn,I ad,I n,I m,B b,B bk){A*av,h,*u
 #define BSLOOPAW(zstmt)     BSLOOPAWX(0  ,i< c,++i,u+=n,zstmt)
 #define BSLOOQAW(zstmt)     BSLOOPAWX(c-1,i>=0,--i,u-=n,zstmt)
 
-static IOF(jtiobs){A*av,h=*hp,*wv,y;B b,bk,*yb,*zb;C*zc;I acn,ad,*hu,*hv,l,m1,md,s,wcn,wd,*zi,*zv;
- bk=mode==IICO||mode==IJ0EPS||mode==IJ1EPS||mode==IPHICO||mode==IPHJ0EPS||mode==IPHJ1EPS;
- b=a==w&&ac==wc&&(mode==IIDOT||mode==IICO||mode==INUB||mode==INUBSV||mode==INUBI); 
- if(mode==INUB||mode==INUBI){GA(y,B01,m,1,0); yb=BAV(y);}
- md=w==mark?-1:mode<IPHOFFSET?mode:mode-IPHOFFSET;
- av=AAV(a); ad=(I)a*ARELATIVE(a); acn=ak/sizeof(A);
- wv=AAV(w); wd=(I)w*ARELATIVE(w); wcn=wk/sizeof(A);
- zi=zv=AV(z); zb=(B*)zv; zc=(C*)zv;
- if(mode<IPHOFFSET)RZ(*hp=h=nodupgrade(a,acr,ac,acn,ad,n,m,b,bk));
- if(w==mark)R mark;
- hv=AV(h)+bk*(m-1); jt->complt=-1; jt->compgt=1;
- for(l=0;l<ac;++l,av+=acn,wv+=wcn,hv+=m){
-  s=hv[bk?1-m:m-1]; m1=0>s?-s:m-1; hu=hv-m1*bk;
-  if(b)switch(md){
-   case IIDOT:        BSLOOPAA(hi++,zv[p]=p,zv[q]=p,zv[q]=p=q); zv+=m;     break;
-   case IICO:         BSLOOPAA(hi--,zv[p]=p,zv[q]=p,zv[q]=p=q); zv+=m;     break;
-   case INUBSV:       BSLOOPAA(hi++,zb[p]=1,zb[q]=0,zb[q]=1  ); zb+=m;     break;
-   case INUB:         BSLOOPAA(hi++,yb[p]=1,yb[q]=0,yb[q]=1  ); DO(m, if(yb[i]){MC(zc,av+i*n,k); zc+=k;}); ZCSHAPE; break;
-   case INUBI:        BSLOOPAA(hi++,yb[p]=1,yb[q]=0,yb[q]=1  ); DO(m, if(yb[i])*zi++=i;);                  ZISHAPE; break;
-  }else switch(md){
-   case IIDOT:        BSLOOPAW(*zv++=-2==q?hu[j]:m);                       break;
-   case IICO:         BSLOOPAW(*zv++=-2==q?hu[j]:m);                       break;
-   case IEPS:         BSLOOPAW(*zb++=-2==q);                               break;
-   case ILESS:        BSLOOPAW(if(-2< q){MC(zc,u,k); zc+=k;}); ZCSHAPE;    break;
-   case II0EPS:  s=m; BSLOOPAW(if(-2< q){s=i; break;});        *zi++=s;    break;
-   case IJ0EPS:  s=m; BSLOOQAW(if(-2< q){s=i; break;});        *zi++=s;    break;
-   case II1EPS:  s=m; BSLOOPAW(if(-2==q){s=i; break;});        *zi++=s;    break;
-   case IJ1EPS:  s=m; BSLOOQAW(if(-2==q){s=i; break;});        *zi++=s;    break;
-   case IANYEPS: s=0; BSLOOPAW(if(-2==q){s=1; break;});        *zb++=1&&s; break;
-   case IALLEPS: s=1; BSLOOPAW(if(-2< q){s=0; break;});        *zb++=1&&s; break;
-   case ISUMEPS: s=0; BSLOOPAW(if(-2==q)++s);                  *zi++=s;    break;
-   case IIFBEPS:      BSLOOPAW(if(-2==q)*zi++=i);              ZISHAPE;    break;
- }}
- R z;
+static IOF(jtiobs)
+{
+	A*av, h = *hp, *wv, y;
+	B b, bk, *yb, *zb;
+	C*zc;
+	I acn, ad, *hu, *hv, l, m1, md, s, wcn, wd, *zi, *zv;
+	bk = mode == IICO || mode == IJ0EPS || mode == IJ1EPS || mode == IPHICO || mode == IPHJ0EPS || mode == IPHJ1EPS;
+	b = a == w && ac == wc && (mode == IIDOT || mode == IICO || mode == INUB || mode == INUBSV || mode == INUBI);
+	if(mode == INUB || mode == INUBI) {
+		GA(y, B01, m, 1, 0);
+		yb = BAV(y);
+	}
+	md = w == mark ? -1 : mode < IPHOFFSET ? mode : mode - IPHOFFSET;
+	av = AAV(a);
+	ad = (I)a * ARELATIVE(a);
+	acn = ak / sizeof(A);
+	wv = AAV(w);
+	wd = (I)w * ARELATIVE(w);
+	wcn = wk / sizeof(A);
+	zi = zv = AV(z);
+	zb = (B*)zv;
+	zc = (C*)zv;
+	if(mode < IPHOFFSET) {
+		RZ(*hp = h = nodupgrade(a, acr, ac, acn, ad, n, m, b, bk));
+	}
+	if(w == mark) {
+		R mark;
+	}
+	hv = AV(h) + bk * (m - 1);
+	jt->complt = -1;
+	jt->compgt = 1;
+	for(l = 0; l < ac; ++l, av += acn, wv += wcn, hv += m) {
+		s = hv[bk ? 1 - m : m - 1];
+		m1 = 0 > s ? -s : m - 1;
+		hu = hv - m1 * bk;
+		if(b)switch(md) {
+			case IIDOT:
+				BSLOOPAA(hi++, zv[p] = p, zv[q] = p, zv[q] = p = q);
+				zv += m;
+				break;
+			case IICO:
+				BSLOOPAA(hi--, zv[p] = p, zv[q] = p, zv[q] = p = q);
+				zv += m;
+				break;
+			case INUBSV:
+				BSLOOPAA(hi++, zb[p] = 1, zb[q] = 0, zb[q] = 1  );
+				zb += m;
+				break;
+			case INUB:
+				BSLOOPAA(hi++, yb[p] = 1, yb[q] = 0, yb[q] = 1  );
+				DO(m, if(yb[i]) {
+				MC(zc, av + i * n, k);
+					zc += k;
+				});
+				ZCSHAPE;
+				break;
+			case INUBI:
+				BSLOOPAA(hi++, yb[p] = 1, yb[q] = 0, yb[q] = 1  );
+				DO(m, if(yb[i])*zi++ = i;);
+				ZISHAPE;
+				break;
+			}
+		else switch(md) {
+			case IIDOT:
+				BSLOOPAW(*zv++ = -2 == q ? hu[j] : m);
+				break;
+			case IICO:
+				BSLOOPAW(*zv++ = -2 == q ? hu[j] : m);
+				break;
+			case IEPS:
+				BSLOOPAW(*zb++ = -2 == q);
+				break;
+			case ILESS:
+				BSLOOPAW(if(-2 < q) {
+				MC(zc, u, k);
+					zc += k;
+				});
+				ZCSHAPE;
+				break;
+			case II0EPS:
+				s = m;
+				BSLOOPAW(if(-2 < q) {
+				s = i;
+				break;
+			});
+				*zi++ = s;
+				break;
+			case IJ0EPS:
+				s = m;
+				BSLOOQAW(if(-2 < q) {
+				s = i;
+				break;
+			});
+				*zi++ = s;
+				break;
+			case II1EPS:
+				s = m;
+				BSLOOPAW(if(-2 == q) {
+				s = i;
+				break;
+			});
+				*zi++ = s;
+				break;
+			case IJ1EPS:
+				s = m;
+				BSLOOQAW(if(-2 == q) {
+				s = i;
+				break;
+			});
+				*zi++ = s;
+				break;
+			case IANYEPS:
+				s = 0;
+				BSLOOPAW(if(-2 == q) {
+				s = 1;
+				break;
+			});
+				*zb++ = 1 && s;
+				break;
+			case IALLEPS:
+				s = 1;
+				BSLOOPAW(if(-2 < q) {
+				s = 0;
+				break;
+			});
+				*zb++ = 1 && s;
+				break;
+			case ISUMEPS:
+				s = 0;
+				BSLOOPAW(if(-2 == q)++s);
+				*zi++ = s;
+				break;
+			case IIFBEPS:
+				BSLOOPAW(if(-2 == q)*zi++ = i);
+				ZISHAPE;
+				break;
+			}
+	}
+	R z;
 }    /* a i.!.0 w on boxed a,w by grading and binary search */
 
-static I jtutype(J jt,A w,I c){A*wv,x;I m,t,wd;
- if(!AN(w))R 1;
- m=AN(w)/c; wv=AAV(w); wd=(I)w*ARELATIVE(w);
- DO(c, t=0; DO(m, x=WVR(i); if(AN(x)){if(t)RZ(t==AT(x)) else{t=AT(x); if(t&FL+CMPX+BOX)R 0;}}););
- R t;
+static I jtutype(J jt, A w, I c)
+{
+	A*wv, x;
+	I m, t, wd;
+	if(!AN(w)) {
+		R 1;
+	}
+	m = AN(w) / c;
+	wv = AAV(w);
+	wd = (I)w * ARELATIVE(w);
+	DO(c, t = 0; DO(m, x = WVR(i); if(AN(x)) {
+	if(t)RZ(t == AT(x)) else {
+				t = AT(x);
+				if(t & FL + CMPX + BOX) {
+					R 0;
+				}
+			}
+	}););
+	R t;
 }    /* return type if opened atoms of cells of w has uniform type, else 0. c is # of cells */
 
-I hsize(I m){I q=m+m,*v=ptab; DO(nptab-1, if(q<=*v)break; ++v;); R*v;}
-
-
-A jtindexofsub(J jt,I mode,A a,A w){PROLOG;A h=0,hi=mtv,z=mtv;AF fn;B mk=w==mark,th;
-    I ac,acr,af,ak,ar,*as,at,c,f,f1,k,k1,m,n,p,r,*s,ss,t,wc,wcr,wf,wk,wr,*ws,wt,zn;
- RZ(a&&w);
- ar=AR(a); acr=jt->rank?jt->rank[0]:ar; af=ar-acr;
- wr=AR(w); wcr=jt->rank?jt->rank[1]:wr; wf=wr-wcr; jt->rank=0;
- as=AS(a); at=AT(a);
- ws=AS(w); wt=AT(w);
- if(mk){f=af; s=as; r=acr-1; f1=wcr-r;}
- else{
-  f=af?af:wf; s=af?as:ws; r=acr?acr-1:0; f1=wcr-r;
-  if(0>f1||ICMP(as+af+1,ws+wf+f1,r)){I f0,*v;
-   m=acr?as[af]:1; f0=MAX(0,f1); RE(zn=mult(prod(f,s),prod(f0,ws+wf)));
-   switch(mode){
-    case IIDOT:  
-    case IICO:    GA(z,INT,zn,f+f0,s); if(af)ICPY(f+AS(z),ws+wf,f0); v=AV(z); DO(zn, *v++=m;); R z;
-    case IEPS:    GA(z,B01,zn,f+f0,s); if(af)ICPY(f+AS(z),ws+wf,f0); memset(BAV(z),C0,zn); R z;
-    case ILESS:                              R ca(w);
-    case IIFBEPS:                            R mtv;
-    case IANYEPS: case IALLEPS: case II0EPS: R zero;
-    case ISUMEPS:                            R sc(0L);
-    case II1EPS:  case IJ1EPS:               R sc(zn);
-    case IJ0EPS:                             R sc(zn-1);
-    case INUBSV:  case INUB:    case INUBI:  ASSERTSYS(0,"indexofsub"); // impossible 
- }}}
- if(at&SPARSE||wt&SPARSE){
-  if(1>=acr)R af?sprank2(a,w,0L,acr,RMAX,jtindexof):wt&SPARSE?iovxs(mode,a,w):iovsd(mode,a,w);
-  if(af||wf)R sprank2(a,w,0L,acr,wcr,jtindexof);
-  switch((at&SPARSE?2:0)+(wt&SPARSE?1:0)){
-   case 1: EPILOG(indexofxx(mode,a,w));
-   case 2: EPILOG(indexofxx(mode,a,w));
-   case 3: EPILOG(indexofss(mode,a,w));
- }}
- m=acr?as[af]:1; n=acr?prod(acr-1,as+af+1):1; RE(zn=mult(prod(f,s),prod(f1,ws+wf)));
- RE(t=mk?at:maxtype(at,wt)); k1=bp(t); k=n*k1; th=HOMO(at,wt); jt->min=ss=0;
- ac=prod(af,as); ak=ac?k1*AN(a)/ac:0;  
- wc=prod(wf,ws); wk=wc?k1*AN(w)/wc:0; c=1<ac?wk/k:zn; wk*=1<wc;
- if(th&&t!=at)RZ(a=t&XNUM?xcvt(XMEXMT,a):cvt(t,a)) else if(t&FL+CMPX      )RZ(a=cvt0(a));
- if(th&&t!=wt)RZ(w=t&XNUM?xcvt(XMEXMT,w):cvt(t,w)) else if(t&FL+CMPX&&a!=w)RZ(w=cvt0(w));
- if(AT(a)&INT+SBT&&k==SZI){I r; irange(AN(a)*k1/SZI,AV(a),&r,&ss); if(ss){jt->min=r;}}
- p=1==k?(t&B01?2:256):2==k?(t&B01?258:65536):k==SZI&&ss&&ss<2.1*MAX(m,c)?ss:hsize(m);
- if(!mk)switch(mode){I q;
-  case IIDOT: 
-  case IICO:    GA(z,INT,zn,f+f1,     s); if(af)ICPY(f+AS(z),ws+wf,f1); break;
-  case INUBSV:  GA(z,B01,zn,f+f1+!acr,s); if(af)ICPY(f+AS(z),ws+wf,f1); if(!acr)*(AS(z)+AR(z)-1)=1; break;
-  case INUB:    q=MIN(m,p); GA(z,t,mult(q,aii(a)),MAX(1,wr),ws); *AS(z)=q; break;
-  case ILESS:   GA(z,t,AN(w),MAX(1,wr),ws); break;
-  case IEPS:    GA(z,B01,zn,f+f1,     s); if(af)ICPY(f+AS(z),ws+wf,f1); break;
-  case INUBI:   q=MIN(m,p); GA(z,INT,q,1,0); break;
-  case IIFBEPS: GA(z,INT,c,1,0); break;
-  case IANYEPS: case IALLEPS:
-                GA(z,B01,1,0,0); break;
-  case II0EPS: case II1EPS: case IJ0EPS: case IJ1EPS: case ISUMEPS:
-                GA(z,INT,1,0,0); break;
- }
- if(!(mk||m&&n&&zn&&th))switch(mode){
-  case IIDOT:   R reshape(shape(z),sc(n?m:0  ));
-  case IICO:    R reshape(shape(z),sc(n?m:m-1));
-  case INUBSV:  R reshape(shape(z),take(sc(m),one));
-  case INUB:    AN(z)=0; *AS(z)=m?1:0; R z;
-  case ILESS:   if(m)AN(z)=*AS(z)=0; else MC(AV(z),AV(w),k1*AN(w)); R z;
-  case IEPS:    R reshape(shape(z),m&&(!n||th)?one:zero);
-  case INUBI:   R m?iv0:mtv;
-  case II0EPS:  R sc(n?0L        :c         );
-  case II1EPS:  R sc(n?c         :0L        );
-  case IJ0EPS:  R sc(n?MAX(0,c-1):c         );
-  case IJ1EPS:  R sc(n?c         :MAX(0,c-1));
-  case ISUMEPS: R sc(n?0L        :c         );
-  case IANYEPS: R    n?zero:one;
-  case IALLEPS: R c&&n?zero:one;
-  case IIFBEPS: R n?mtv :IX(c);
- }
- if(a!=w&&!mk&&1==acr&&(1==wc||ac==wc)&&(D)m*n*zn<13*((D)m*n+zn)&&(mode==IIDOT||mode==IICO||mode==IEPS)){
-  fn=jtiosc;
- }else{B b=0==jt->ct;I ht=INT,t1;
-  if(!b&&t&BOX+FL+CMPX)ctmask(jt);
-  if     (t&BOX)          fn=b&&(1<n||usebs(a,ac,m))?jtiobs:1<n?jtioa:b?jtioax1:
-                              (t1=utype(a,ac))&&(mk||a==w||t1==utype(w,wc))?jtioau:jtioa1;
-  else if(t&XNUM)         fn=jtiox;
-  else if(t&RAT )         fn=jtioq;
-  else if(1==k)           {fn=jtio1; if(!(mode==IIDOT||mode==IICO))ht=B01;}
-  else if(2==k)           {fn=jtio2; if(!(mode==IIDOT||mode==IICO))ht=B01;}
-  else if(k==SZI&&!(t&FL)){if(p==ss){fn=jtio4; if(!(mode==IIDOT||mode==IICO))ht=B01;}else fn=jtioi;}
-  else                    fn=b||t&B01+JCHAR+INT+SBT?jtioc:1==n?(t&FL?jtiod1:jtioz1):t&FL?jtiod:jtioz;
-  if(fn!=jtiobs)GA(h,ht,p,1,0);
- }
- if(fn==jtioc){A x;B*b;C*u,*v;I*d,q;
-  GA(x,B01,k,1,0); b=BAV(x); memset(b,C1,k);
-  q=k; u=CAV(a); v=u+k;
-  DO(ac*(m-1), DO(k, if(u[i]!=*v&&b[i]){b[i]=0; --q;} ++v;); if(!q)break;);
-  if(q){jt->hin=k-q; GA(hi,INT,k-q,1,0); jt->hiv=d=AV(hi); DO(k, if(!b[i])*d++=i;); fn=jtiocx;}
- }
- RZ(fn(jt,mode,m,n,c,k,acr,wcr,ac,wc,ak,wk,a,w,&h,z));
- if(mk){A x,*zv;I*xv,ztype;
-  GA(z,BOX,3,1,0); zv=AAV(z);
-  GA(x,INT,6,1,0); xv=AV(x);
-  switch(mode){
-   default:                    ztype=0; break;  /* integer vector      */
-   case ILESS:                 ztype=1; break;  /* type/shape from arg */
-   case IEPS:                  ztype=2; break;  /* boolean vector      */
-   case IANYEPS: case IALLEPS: ztype=3; break;  /* boolean scalar      */
-   case ISUMEPS:
-   case II0EPS:  case II1EPS:  
-   case IJ0EPS:  case IJ1EPS:  ztype=4;         /* integer scalar      */
-  }
-  xv[0]=mode; xv[1]=n; xv[2]=k; xv[3]=jt->min; xv[4]=(I)fn; xv[5]=ztype; 
-  zv[0]=x; zv[1]=h; zv[2]=hi;
- }
- EPILOG(z);
-}    /* a i."r w main control */
-
-A jtindexofprehashed(J jt,A a,A w,A hs){A h,hi,*hv,x,z;AF fn;I ar,*as,at,c,f1,k,m,mode,n,
-     r,t,*xv,wr,*ws,wt,ztype;
- RZ(a&&w&&hs);
- hv=AAV(hs); x=hv[0]; h=hv[1]; hi=hv[2];  
- xv=AV(x); mode=xv[0]; n=xv[1]; k=xv[2]; jt->min=xv[3]; fn=(AF)xv[4]; ztype=xv[5]; 
- ar=AR(a); as=AS(a); at=AT(a); t=at; m=ar?*as:1; 
- wr=AR(w); ws=AS(w); wt=AT(w);
- if(1==ztype)r=wr?wr-1:0;
- else        r=ar?ar-1:0;
- f1=wr-r;
- ASSERT(r<=ar&&0<=f1,EVRANK); 
- ASSERT(!ICMP(as+ar-r,ws+f1,r),EVLENGTH);
- RE(c=prod(f1,ws));
- if(mode==ILESS&&(t!=wt||AFLAG(w)&AFNJA+AFREL||n!=aii(w)))R less(w,a);
- if(!(m&&n&&c&&HOMO(t,wt)&&t>=wt))R indexofsub(mode,a,w);
- switch(ztype){
-  case 0: GA(z,INT,c,    f1, ws); break;
-  case 1: GA(z,wt, AN(w),1+r,ws); break;
-  case 2: GA(z,B01,c,    f1, ws); break;
-  case 3: GA(z,B01,1,    0,  0 ); break;
-  case 4: GA(z,INT,1,    0,  0 ); break;
- }
- jt->hin=AN(hi); jt->hiv=AV(hi);
- if(t!=wt)RZ(w=cvt(t,w)) else if(t&FL+CMPX)RZ(w=cvt0(w));
- R fn(jt,mode+IPHOFFSET,m,n,c,k,AR(a),AR(w),(I)1,(I)1,(I)0,(I)0,a,w,&h,z);
+I hsize(I m)
+{
+	I q = m + m, *v = ptab;
+	DO(nptab - 1, if(q <= *v)break; ++v;);
+	R*v;
 }
 
-F2(jtindexof){R indexofsub(IIDOT,a,w);}
-     /* a i."r w */
 
-F2(jtjico2){R indexofsub(IICO,a,w);}
-     /* a i:"r w */
+A jtindexofsub(J jt, I mode, A a, A w)
+{
+	PROLOG;
+	A h = 0, hi = mtv, z = mtv;
+	AF fn;
+	B mk = w == mark, th;
+	I ac, acr, af, ak, ar, *as, at, c, f, f1, k, k1, m, n, p, r, *s, ss, t, wc, wcr, wf, wk, wr, *ws, wt, zn;
+	RZ(a && w);
+	ar = AR(a);
+	acr = jt->rank ? jt->rank[0] : ar;
+	af = ar - acr;
+	wr = AR(w);
+	wcr = jt->rank ? jt->rank[1] : wr;
+	wf = wr - wcr;
+	jt->rank = 0;
+	as = AS(a);
+	at = AT(a);
+	ws = AS(w);
+	wt = AT(w);
+	if(mk) {
+		f = af;
+		s = as;
+		r = acr - 1;
+		f1 = wcr - r;
+	} else {
+		f = af ? af : wf;
+		s = af ? as : ws;
+		r = acr ? acr - 1 : 0;
+		f1 = wcr - r;
+		if(0 > f1 || ICMP(as + af + 1, ws + wf + f1, r)) {
+			I f0, *v;
+			m = acr ? as[af] : 1;
+			f0 = MAX(0, f1);
+			RE(zn = mult(prod(f, s), prod(f0, ws + wf)));
+			switch(mode) {
+			case IIDOT:
+			case IICO:
+				GA(z, INT, zn, f + f0, s);
+				if(af) {
+					ICPY(f + AS(z), ws + wf, f0);
+				}
+				v = AV(z);
+				DO(zn, *v++ = m;);
+				R z;
+			case IEPS:
+				GA(z, B01, zn, f + f0, s);
+				if(af) {
+					ICPY(f + AS(z), ws + wf, f0);
+				}
+				memset(BAV(z), C0, zn);
+				R z;
+			case ILESS:
+				R ca(w);
+			case IIFBEPS:
+				R mtv;
+			case IANYEPS:
+			case IALLEPS:
+			case II0EPS:
+				R zero;
+			case ISUMEPS:
+				R sc(0L);
+			case II1EPS:
+			case IJ1EPS:
+				R sc(zn);
+			case IJ0EPS:
+				R sc(zn - 1);
+			case INUBSV:
+			case INUB:
+			case INUBI:
+				ASSERTSYS(0, "indexofsub"); // impossible
+			}
+		}
+	}
+	if(at & SPARSE || wt & SPARSE) {
+		if(1 >= acr) {
+			R af ? sprank2(a, w, 0L, acr, RMAX, jtindexof) : wt&SPARSE ? iovxs(mode, a, w) : iovsd(mode, a, w);
+		}
+		if(af || wf) {
+			R sprank2(a, w, 0L, acr, wcr, jtindexof);
+		}
+		switch((at & SPARSE ? 2 : 0) + (wt & SPARSE ? 1 : 0)) {
+		case 1:
+			EPILOG(indexofxx(mode, a, w));
+		case 2:
+			EPILOG(indexofxx(mode, a, w));
+		case 3:
+			EPILOG(indexofss(mode, a, w));
+		}
+	}
+	m = acr ? as[af] : 1;
+	n = acr ? prod(acr - 1, as + af + 1) : 1;
+	RE(zn = mult(prod(f, s), prod(f1, ws + wf)));
+	RE(t = mk ? at : maxtype(at, wt));
+	k1 = bp(t);
+	k = n * k1;
+	th = HOMO(at, wt);
+	jt->min = ss = 0;
+	ac = prod(af, as);
+	ak = ac ? k1 * AN(a) / ac : 0;
+	wc = prod(wf, ws);
+	wk = wc ? k1 * AN(w) / wc : 0;
+	c = 1 < ac ? wk / k : zn;
+	wk *= 1 < wc;
+	if(th && t != at) {
+		RZ(a = t & XNUM ? xcvt(XMEXMT, a) : cvt(t, a))
+	} else if(t & FL + CMPX) {
+		RZ(a = cvt0(a))
+	}
+	if(th && t != wt) {
+		RZ(w = t & XNUM ? xcvt(XMEXMT, w) : cvt(t, w))
+	} else if(t & FL + CMPX && a != w) {
+		RZ(w = cvt0(w))
+	}
+	if(AT(a)&INT + SBT && k == SZI) {
+		I r;
+		irange(AN(a)*k1 / SZI, AV(a), &r, &ss);
+		if(ss) {
+			jt->min = r;
+		}
+	}
+	p = 1 == k ? (t & B01 ? 2 : 256) : 2 == k ? (t & B01 ? 258 : 65536) : k == SZI && ss && ss < 2.1 * MAX(m, c) ? ss : hsize(m);
+	if(!mk)switch(mode) {
+			I q;
+		case IIDOT:
+		case IICO:
+			GA(z, INT, zn, f + f1,     s);
+			if(af) {
+				ICPY(f + AS(z), ws + wf, f1);
+			}
+			break;
+		case INUBSV:
+			GA(z, B01, zn, f + f1 + !acr, s);
+			if(af) {
+				ICPY(f + AS(z), ws + wf, f1);
+			}
+			if(!acr) {
+				*(AS(z) + AR(z) - 1) = 1;
+			}
+			break;
+		case INUB:
+			q = MIN(m, p);
+			GA(z, t, mult(q, aii(a)), MAX(1, wr), ws);
+			*AS(z) = q;
+			break;
+		case ILESS:
+			GA(z, t, AN(w), MAX(1, wr), ws);
+			break;
+		case IEPS:
+			GA(z, B01, zn, f + f1,     s);
+			if(af) {
+				ICPY(f + AS(z), ws + wf, f1);
+			}
+			break;
+		case INUBI:
+			q = MIN(m, p);
+			GA(z, INT, q, 1, 0);
+			break;
+		case IIFBEPS:
+			GA(z, INT, c, 1, 0);
+			break;
+		case IANYEPS:
+		case IALLEPS:
+			GA(z, B01, 1, 0, 0);
+			break;
+		case II0EPS:
+		case II1EPS:
+		case IJ0EPS:
+		case IJ1EPS:
+		case ISUMEPS:
+			GA(z, INT, 1, 0, 0);
+			break;
+		}
+	if(!(mk || m && n && zn && th))switch(mode) {
+		case IIDOT:
+			R reshape(shape(z), sc(n ? m : 0  ));
+		case IICO:
+			R reshape(shape(z), sc(n ? m : m - 1));
+		case INUBSV:
+			R reshape(shape(z), take(sc(m), one));
+		case INUB:
+			AN(z) = 0;
+			*AS(z) = m ? 1 : 0;
+			R z;
+		case ILESS:
+			if(m) {
+				AN(z) = *AS(z) = 0;
+			} else {
+				MC(AV(z), AV(w), k1 * AN(w));
+			}
+			R z;
+		case IEPS:
+			R reshape(shape(z), m && (!n || th) ? one : zero);
+		case INUBI:
+			R m ? iv0 : mtv;
+		case II0EPS:
+			R sc(n ? 0L        : c         );
+		case II1EPS:
+			R sc(n ? c         : 0L        );
+		case IJ0EPS:
+			R sc(n ? MAX(0, c - 1) : c         );
+		case IJ1EPS:
+			R sc(n ? c         : MAX(0, c - 1));
+		case ISUMEPS:
+			R sc(n ? 0L        : c         );
+		case IANYEPS:
+			R    n ? zero : one;
+		case IALLEPS:
+			R c && n ? zero : one;
+		case IIFBEPS:
+			R n ? mtv : IX(c);
+		}
+	if(a != w && !mk && 1 == acr && (1 == wc || ac == wc) && (D)m * n * zn < 13 * ((D)m * n + zn) && (mode == IIDOT || mode == IICO || mode == IEPS)) {
+		fn = jtiosc;
+	} else {
+		B b = 0 == jt->ct;
+		I ht = INT, t1;
+		if(!b && t & BOX + FL + CMPX) {
+			ctmask(jt);
+		}
+		if     (t & BOX)          fn = b && (1 < n || usebs(a, ac, m)) ? jtiobs : 1 < n ? jtioa : b ? jtioax1 :
+										   (t1 = utype(a, ac)) && (mk || a == w || t1 == utype(w, wc)) ? jtioau : jtioa1;
+		else if(t & XNUM) {
+			fn = jtiox;
+		} else if(t & RAT ) {
+			fn = jtioq;
+		} else if(1 == k)           {
+			fn = jtio1;
+			if(!(mode == IIDOT || mode == IICO)) {
+				ht = B01;
+			}
+		} else if(2 == k)           {
+			fn = jtio2;
+			if(!(mode == IIDOT || mode == IICO)) {
+				ht = B01;
+			}
+		} else if(k == SZI && !(t & FL)) {
+			if(p == ss) {
+				fn = jtio4;
+				if(!(mode == IIDOT || mode == IICO)) {
+					ht = B01;
+				}
+			} else {
+				fn = jtioi;
+			}
+		} else {
+			fn = b || t & B01 + JCHAR + INT + SBT ? jtioc : 1 == n ? (t & FL ? jtiod1 : jtioz1) : t & FL ? jtiod : jtioz;
+		}
+		if(fn != jtiobs) {
+			GA(h, ht, p, 1, 0);
+		}
+	}
+	if(fn == jtioc) {
+		A x;
+		B*b;
+		C*u, *v;
+		I*d, q;
+		GA(x, B01, k, 1, 0);
+		b = BAV(x);
+		memset(b, C1, k);
+		q = k;
+		u = CAV(a);
+		v = u + k;
+		DO(ac * (m - 1), DO(k, if(u[i] != *v && b[i]) {
+		b[i] = 0;
+			--q;
+		} ++v;); if(!q)break;);
+		if(q) {
+			jt->hin = k - q;
+			GA(hi, INT, k - q, 1, 0);
+			jt->hiv = d = AV(hi);
+			DO(k, if(!b[i])*d++ = i;);
+			fn = jtiocx;
+		}
+	}
+	RZ(fn(jt, mode, m, n, c, k, acr, wcr, ac, wc, ak, wk, a, w, &h, z));
+	if(mk) {
+		A x, *zv;
+		I*xv, ztype;
+		GA(z, BOX, 3, 1, 0);
+		zv = AAV(z);
+		GA(x, INT, 6, 1, 0);
+		xv = AV(x);
+		switch(mode) {
+		default:
+			ztype = 0;
+			break;  /* integer vector      */
+		case ILESS:
+			ztype = 1;
+			break;  /* type/shape from arg */
+		case IEPS:
+			ztype = 2;
+			break;  /* boolean vector      */
+		case IANYEPS:
+		case IALLEPS:
+			ztype = 3;
+			break;  /* boolean scalar      */
+		case ISUMEPS:
+		case II0EPS:
+		case II1EPS:
+		case IJ0EPS:
+		case IJ1EPS:
+			ztype = 4;       /* integer scalar      */
+		}
+		xv[0] = mode;
+		xv[1] = n;
+		xv[2] = k;
+		xv[3] = jt->min;
+		xv[4] = (I)fn;
+		xv[5] = ztype;
+		zv[0] = x;
+		zv[1] = h;
+		zv[2] = hi;
+	}
+	EPILOG(z);
+}    /* a i."r w main control */
 
-F1(jtnubsieve){
- RZ(w);
- if(SPARSE&AT(w))R nubsievesp(w); 
- if(jt->rank)jt->rank[0]=jt->rank[1]; 
- R indexofsub(INUBSV,w,w); 
+A jtindexofprehashed(J jt, A a, A w, A hs)
+{
+	A h, hi, *hv, x, z;
+	AF fn;
+	I ar, *as, at, c, f1, k, m, mode, n,
+	r, t, *xv, wr, *ws, wt, ztype;
+	RZ(a && w && hs);
+	hv = AAV(hs);
+	x = hv[0];
+	h = hv[1];
+	hi = hv[2];
+	xv = AV(x);
+	mode = xv[0];
+	n = xv[1];
+	k = xv[2];
+	jt->min = xv[3];
+	fn = (AF)xv[4];
+	ztype = xv[5];
+	ar = AR(a);
+	as = AS(a);
+	at = AT(a);
+	t = at;
+	m = ar ? *as : 1;
+	wr = AR(w);
+	ws = AS(w);
+	wt = AT(w);
+	if(1 == ztype) {
+		r = wr ? wr - 1 : 0;
+	} else {
+		r = ar ? ar - 1 : 0;
+	}
+	f1 = wr - r;
+	ASSERT(r <= ar && 0 <= f1, EVRANK);
+	ASSERT(!ICMP(as + ar - r, ws + f1, r), EVLENGTH);
+	RE(c = prod(f1, ws));
+	if(mode == ILESS && (t != wt || AFLAG(w)&AFNJA + AFREL || n != aii(w))) {
+		R less(w, a);
+	}
+	if(!(m && n && c && HOMO(t, wt) && t >= wt)) {
+		R indexofsub(mode, a, w);
+	}
+	switch(ztype) {
+	case 0:
+		GA(z, INT, c,    f1, ws);
+		break;
+	case 1:
+		GA(z, wt, AN(w), 1 + r, ws);
+		break;
+	case 2:
+		GA(z, B01, c,    f1, ws);
+		break;
+	case 3:
+		GA(z, B01, 1,    0,  0 );
+		break;
+	case 4:
+		GA(z, INT, 1,    0,  0 );
+		break;
+	}
+	jt->hin = AN(hi);
+	jt->hiv = AV(hi);
+	if(t != wt) {
+		RZ(w = cvt(t, w))
+	} else if(t & FL + CMPX) {
+			RZ(w = cvt0(w));
+	}
+	R fn(jt, mode + IPHOFFSET, m, n, c, k, AR(a), AR(w), (I)1, (I)1, (I)0, (I)0, a, w, &h, z);
+}
+
+F2(jtindexof)
+{
+	R indexofsub(IIDOT, a, w);
+}
+/* a i."r w */
+
+F2(jtjico2)
+{
+	R indexofsub(IICO, a, w);
+}
+/* a i:"r w */
+
+F1(jtnubsieve)
+{
+	RZ(w);
+	if(SPARSE & AT(w)) {
+		R nubsievesp(w);
+	}
+	if(jt->rank) {
+		jt->rank[0] = jt->rank[1];
+	}
+	R indexofsub(INUBSV, w, w);
 }    /* ~:"r w */
 
-F1(jtnub){ 
- RZ(w);
- if(SPARSE&AT(w)||AFLAG(w)&AFNJA+AFREL)R repeat(nubsieve(w),w); 
- R indexofsub(INUB,w,w);
+F1(jtnub)
+{
+	RZ(w);
+	if(SPARSE & AT(w) || AFLAG(w)&AFNJA + AFREL) {
+		R repeat(nubsieve(w), w);
+	}
+	R indexofsub(INUB, w, w);
 }    /* ~.w */
 
-F2(jtless){A x=w;I ar,at,k,r,*s,wr,*ws,wt;
- RZ(a&&w);
- at=AT(a); ar=AR(a); 
- wt=AT(w); wr=AR(w); r=MAX(1,ar);
- if(ar>1+wr)R ca(a);
- if(wr&&r!=wr){RZ(x=gah(r,w)); s=AS(x); ws=AS(w); k=ar>wr?0:1+wr-r; *s=prod(k,ws); ICPY(1+s,k+ws,r-1);}
- R !(at&SPARSE)&&HOMO(at,wt)&&at==maxtype(at,wt)&&!(AFLAG(a)&AFNJA+AFREL)?indexofsub(ILESS,x,a):
-     repeat(not(eps(a,x)),a);
+F2(jtless)
+{
+	A x = w;
+	I ar, at, k, r, *s, wr, *ws, wt;
+	RZ(a && w);
+	at = AT(a);
+	ar = AR(a);
+	wt = AT(w);
+	wr = AR(w);
+	r = MAX(1, ar);
+	if(ar > 1 + wr) {
+		R ca(a);
+	}
+	if(wr && r != wr) {
+		RZ(x = gah(r, w));
+		s = AS(x);
+		ws = AS(w);
+		k = ar > wr ? 0 : 1 + wr - r;
+		*s = prod(k, ws);
+		ICPY(1 + s, k + ws, r - 1);
+	}
+	R !(at & SPARSE)&&HOMO(at, wt)&&at == maxtype(at, wt)&&!(AFLAG(a)&AFNJA + AFREL) ? indexofsub(ILESS, x, a) :
+	repeat(not(eps(a, x)), a);
 }    /* a-.w */
 
-F2(jteps){I l,r,rv[2];
- RZ(a&&w);
- rv[0]=r=jt->rank?jt->rank[1]:AR(w);
- rv[1]=l=jt->rank?jt->rank[0]:AR(a); jt->rank=0;
- if(SPARSE&AT(a)+AT(w))R lt(irs2(w,a,0L,r,l,jtindexof),sc(r?*(AS(w)+AR(w)-r):1));
- jt->rank=rv; 
- R indexofsub(IEPS,w,a);
+F2(jteps)
+{
+	I l, r, rv[2];
+	RZ(a && w);
+	rv[0] = r = jt->rank ? jt->rank[1] : AR(w);
+	rv[1] = l = jt->rank ? jt->rank[0] : AR(a);
+	jt->rank = 0;
+	if(SPARSE & AT(a) + AT(w)) {
+		R lt(irs2(w, a, 0L, r, l, jtindexof), sc(r ? * (AS(w) + AR(w) - r) : 1));
+	}
+	jt->rank = rv;
+	R indexofsub(IEPS, w, a);
 }    /* a e."r w */
 
-F1(jtnubind){
- RZ(w);
- R SPARSE&AT(w)?icap(nubsieve(w)):indexofsub(INUBI,w,w);
+F1(jtnubind)
+{
+	RZ(w);
+	R SPARSE&AT(w) ? icap(nubsieve(w)) : indexofsub(INUBI, w, w);
 }    /* I.@~: w */
 
-F1(jtnubind0){A z;D oldct=jt->ct;
- RZ(w);
- jt->ct=0.0; z=SPARSE&AT(w)?icap(nubsieve(w)):indexofsub(INUBI,w,w); jt->ct=oldct;
- R z;
+F1(jtnubind0)
+{
+	A z;
+	D oldct = jt->ct;
+	RZ(w);
+	jt->ct = 0.0;
+	z = SPARSE & AT(w) ? icap(nubsieve(w)) : indexofsub(INUBI, w, w);
+	jt->ct = oldct;
+	R z;
 }    /* I.@(~:!.0) w */
 
 
-F1(jtsclass){A e,x,xy,y,z;I c,j,m,n,*v;P*p;
- RZ(w);
- if(!AR(w))R reshape(v2(1L,1L),one);
- n=IC(w);
- RZ(x=indexof(w,w));
- if(DENSE&AT(w))R atab(CEQ,repeat(eq(IX(n),x),x),x);
- p=PAV(x); e=SPA(p,e); y=SPA(p,i); RZ(xy=stitch(SPA(p,x),y));
- if(n>*AV(e))RZ(xy=over(xy,stitch(e,less(IX(n),y))));
- RZ(xy=grade2(xy,xy)); v=AV(xy);
- c=*AS(xy);
- m=j=-1; DO(c, if(j!=*v){j=*v; ++m;} *v=m; v+=2;);
- GA(z,SB01,1,2,0);  v=AS(z); v[0]=1+m; v[1]=n;
- p=PAV(z); 
- SPB(p,a,v2(0L,1L));
- SPB(p,e,zero);
- SPB(p,i,xy);
- SPB(p,x,reshape(sc(c),one));
- R z;
+F1(jtsclass)
+{
+	A e, x, xy, y, z;
+	I c, j, m, n, *v;
+	P*p;
+	RZ(w);
+	if(!AR(w)) {
+		R reshape(v2(1L, 1L), one);
+	}
+	n = IC(w);
+	RZ(x = indexof(w, w));
+	if(DENSE & AT(w)) {
+		R atab(CEQ, repeat(eq(IX(n), x), x), x);
+	}
+	p = PAV(x);
+	e = SPA(p, e);
+	y = SPA(p, i);
+	RZ(xy = stitch(SPA(p, x), y));
+	if(n > *AV(e)) {
+		RZ(xy = over(xy, stitch(e, less(IX(n), y))));
+	}
+	RZ(xy = grade2(xy, xy));
+	v = AV(xy);
+	c = *AS(xy);
+	m = j = -1;
+	DO(c, if(j != *v) {
+	j = *v;
+	++m;
+} *v = m; v += 2;);
+	GA(z, SB01, 1, 2, 0);
+	v = AS(z);
+	v[0] = 1 + m;
+	v[1] = n;
+	p = PAV(z);
+	SPB(p, a, v2(0L, 1L));
+	SPB(p, e, zero);
+	SPB(p, i, xy);
+	SPB(p, x, reshape(sc(c), one));
+	R z;
 }
 
 
@@ -712,29 +1319,51 @@ F1(jtsclass){A e,x,xy,y,z;I c,j,m,n,*v;P*p;
    ++av; ++wv; ++zv;                                                       \
  }}
 
-static IOCOLFT(D,jtiocold,hid(*v),    hid(tl*x),hid(tr*x),!teq(*v,av[c*hj]))
-static IOCOLFT(Z,jtiocolz,hid(*(D*)v),hid(tl*x),hid(tr*x),!zeq(*v,av[c*hj]))
+static IOCOLFT(D, jtiocold, hid(*v),    hid(tl*x), hid(tr*x), !teq(*v, av[c*hj]))
+static IOCOLFT(Z, jtiocolz, hid(*(D*)v), hid(tl*x), hid(tr*x), !zeq(*v, av[c*hj]))
 
-static JOCOLFT(D,jtjocold,hid(*v),    hid(tl*x),hid(tr*x),!teq(*v,av[c*hj]))
-static JOCOLFT(Z,jtjocolz,hid(*(D*)v),hid(tl*x),hid(tr*x),!zeq(*v,av[c*hj]))
+static JOCOLFT(D, jtjocold, hid(*v),    hid(tl*x), hid(tr*x), !teq(*v, av[c*hj]))
+static JOCOLFT(Z, jtjocolz, hid(*(D*)v), hid(tl*x), hid(tr*x), !zeq(*v, av[c*hj]))
 
-A jtiocol(J jt,I mode,A a,A w){A h,z;I ar,at,c,d,m,p,t,wr,*ws,wt;void(*fn)();
- RZ(a&&w);
- ASSERT(0!=jt->ct,EVNONCE);
- at=AT(a); ar=AR(a); m=*AS(a); c=aii(a);
- wt=AT(w); wr=AR(w); ws=AS(w); 
- d=1; DO(1+wr-ar, d*=ws[i];);
- RE(t=maxtype(at,wt));
- if(t!=at)RZ(a=cvt(t,a));
- if(t!=wt)RZ(w=cvt(t,w));
- p=hsize(m);
- GA(h,INT,p,1,0);
- GA(z,INT,AN(w),wr,ws);
- switch(t){
-  default:   ASSERT(0,EVNONCE);     
-  case FL:   fn=mode==IICO?jtjocold:jtiocold; ctmask(jt); break;
-  case CMPX: fn=mode==IICO?jtjocolz:jtiocolz; ctmask(jt); break;
- }
- fn(jt,m,c,d,a,w,z,h);
- R z;
+A jtiocol(J jt, I mode, A a, A w)
+{
+	A h, z;
+	I ar, at, c, d, m, p, t, wr, *ws, wt;
+	void(*fn)();
+	RZ(a && w);
+	ASSERT(0 != jt->ct, EVNONCE);
+	at = AT(a);
+	ar = AR(a);
+	m = *AS(a);
+	c = aii(a);
+	wt = AT(w);
+	wr = AR(w);
+	ws = AS(w);
+	d = 1;
+	DO(1 + wr - ar, d *= ws[i];);
+	RE(t = maxtype(at, wt));
+	if(t != at) {
+		RZ(a = cvt(t, a));
+	}
+	if(t != wt) {
+		RZ(w = cvt(t, w));
+	}
+	p = hsize(m);
+	GA(h, INT, p, 1, 0);
+	GA(z, INT, AN(w), wr, ws);
+	switch(t) {
+	default:
+		ASSERT(0, EVNONCE);
+	case FL:
+		fn = mode == IICO ? jtjocold : jtiocold;
+		ctmask(jt);
+		break;
+	case CMPX:
+		fn = mode == IICO ? jtjocolz : jtiocolz;
+		ctmask(jt);
+		break;
+	}
+	fn(jt, m, c, d, a, w, z, h);
+	R z;
 }    /* a i."1 &.|:w or a i:"1 &.|:w */
+

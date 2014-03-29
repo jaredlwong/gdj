@@ -25,37 +25,73 @@
 #define RARGX   {if(1<AC(ya)){RZ(ya=ca(ya)); uu=CAV(ya);}  \
                  if(1<AC(yw)){RZ(yw=ca(yw)); vv=CAV(yw);}}
 #endif
-{B cc=1;C*zv;I j=0,jj=0,old;
- if(mn){y0=y=RCALL; RZ(y);}
- else{I d;
-  d=jt->db; jt->db=0; y=RCALL; jt->db=d;
-  if(jt->jerr){y=zero; RESETERR;}
- } 
- yt=AT(y); yr=AR(y); ys=AS(y); yn=AN(y); k=yn*bp(yt);
- if(!mn||yt&DIRECT&&RFLAG){I zn;
-  RARGX; RE(zn=mult(mn,yn));
-  GA(z,yt,zn,p+yr,0L); ICPY(AS(z),s,p); ICPY(p+AS(z),ys,yr);
-  if(mn){zv=CAV(z); MC(zv,AV(y),k);}
-  old=jt->tbase+jt->ttop;
-  for(j=1;j<mn;++j){
-   RARG; 
-   RZ(y=RCALL);
-   if(yt!=AT(y)||yr!=AR(y)||yr&&ICMP(AS(y),ys,yr))break;
-   MC(zv+=k,AV(y),k);
-   if(cc&&RAC)tpop(old); else cc=0;
- }}
- if(j<mn){A q,*x,yz;
-  jj=j%n;
-  GA(yz,BOX,mn,p,s); x=AAV(yz);
-  if(j){
-   zv=CAV(z)-k;
-   DO(j, GA(q,AT(y0),AN(y0),AR(y0),AS(y0)); MC(AV(q),zv+=k,k); *x++=q;);
-  }
-  *x++=y;
-  DO(mn-j-1, RARG; RZ(y=RCALL); *x++=y;);
-  z=ope(yz);
- }
- EPILOG(z);
+{
+	B cc = 1;
+	C*zv;
+	I j = 0, jj = 0, old;
+	if(mn)
+	{
+		y0 = y = RCALL;
+		RZ(y);
+	} else{
+		I d;
+		d = jt->db;
+		jt->db = 0;
+		y = RCALL;
+		jt->db = d;
+		if(jt->jerr)
+		{
+			y = zero;
+			RESETERR;
+		}
+	}
+	yt = AT(y);
+	yr = AR(y);
+	ys = AS(y);
+	yn = AN(y);
+	k = yn * bp(yt);
+	if(!mn || yt & DIRECT && RFLAG)
+	{
+		I zn;
+		RARGX;
+		RE(zn = mult(mn, yn));
+		GA(z, yt, zn, p + yr, 0L);
+		ICPY(AS(z), s, p);
+		ICPY(p + AS(z), ys, yr);
+		if(mn) {
+			zv = CAV(z);
+			MC(zv, AV(y), k);
+		}
+		old = jt->tbase + jt->ttop;
+		for(j = 1; j < mn; ++j) {
+			RARG;
+			RZ(y = RCALL);
+			if(yt != AT(y) || yr != AR(y) || yr && ICMP(AS(y), ys, yr)) {
+				break;
+			}
+			MC(zv += k, AV(y), k);
+			if(cc && RAC) {
+				tpop(old);
+			} else {
+				cc = 0;
+			}
+		}
+	}
+	if(j < mn)
+	{
+		A q, *x, yz;
+		jj = j % n;
+		GA(yz, BOX, mn, p, s);
+		x = AAV(yz);
+		if(j) {
+			zv = CAV(z) - k;
+			DO(j, GA(q, AT(y0), AN(y0), AR(y0), AS(y0)); MC(AV(q), zv += k, k); *x++ = q;);
+		}
+		*x++ = y;
+		DO(mn - j - 1, RARG; RZ(y = RCALL); *x++ = y;);
+		z = ope(yz);
+	}
+	EPILOG(z);
 }
 #undef VALENCE
 #undef RAC
@@ -68,3 +104,4 @@
 
 
 #undef TEMPLATE
+

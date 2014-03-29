@@ -6,10 +6,9 @@ static char input[30000];
 
 char* Jinput(J jt, char* prompt)
 {
-	fputs(prompt,stdout);
+	fputs(prompt, stdout);
 	fflush(stdout); /* windows emacs */
-	if(!fgets(input, sizeof(input), stdin))
-	{
+	if(!fgets(input, sizeof(input), stdin)) {
 		/* unix eof without readline */
 		return "2!:55''";
 	}
@@ -17,10 +16,9 @@ char* Jinput(J jt, char* prompt)
 }
 
 /* J calls for output */
-void Joutput(J jt,int type, char* s)
+void Joutput(J jt, int type, char* s)
 {
-	if (MTYOEXIT == type)
-	{
+	if (MTYOEXIT == type) {
 		exit((int)(I)s);
 	}
 	fputs(s, stdout);
@@ -35,8 +33,9 @@ int main(int argc, char* argv[])
 	JSM(jt, callbacks);
 
 	while (1) {
-		JDo(jt, Jinput(jt,"   "));
+		JDo(jt, Jinput(jt, "   "));
 	}
 	JFree(jt);
 	return 0;
 }
+

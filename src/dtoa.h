@@ -19,9 +19,10 @@ struct dtoa_info {
 	Bigint *_p5s;
 	double *_pmem_next;
 	double _private_mem[PRIVATE_mem];
-	Bigint *_freelist[Kmax+1];
+	Bigint *_freelist[Kmax + 1];
 	void *jt;
 	int ndp;
 	char *result;
 };
 #endif
+

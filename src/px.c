@@ -20,55 +20,111 @@
 #include "p.h"
 
 
-A jteval(J jt,C*s){R parse(tokens(cstr(s)));}
-
-A jtev1(J jt,    A w,C*s){R df1(  w,eval(s));}
-A jtev2(J jt,A a,A w,C*s){R df2(a,w,eval(s));}
-A jteva(J jt,    A w,C*s){R df1(  w,colon(one,   cstr(s)));}
-A jtevc(J jt,A a,A w,C*s){R df2(a,w,colon(num[2],cstr(s)));}
-
-F1(jtexec1){A z;
- F1RANK(1,jtexec1,0);
- FDEPINC(1); z=parse(tokens(vs(w))); jt->asgn=0; FDEPDEC(1);
- R z&&AT(z)&VERB+ADV+CONJ+MARK?mtv:z;
+A jteval(J jt, C*s)
+{
+	R parse(tokens(cstr(s)));
 }
 
-F1(jtimmex){A z;
- FDEPINC(1); z=parse(tokens(w)); FDEPDEC(1); 
- if(EWTHROW==jt->jerr){RESETERR; z=mtm;}
- if(z&&!jt->asgn)jpr(z);
- R z;
+A jtev1(J jt,    A w, C*s)
+{
+	R df1(  w, eval(s));
+}
+A jtev2(J jt, A a, A w, C*s)
+{
+	R df2(a, w, eval(s));
+}
+A jteva(J jt,    A w, C*s)
+{
+	R df1(  w, colon(one,   cstr(s)));
+}
+A jtevc(J jt, A a, A w, C*s)
+{
+	R df2(a, w, colon(num[2], cstr(s)));
 }
 
-F1(jtimmea){A t,z;
- z=immex(w); 
- ASSERT(jt->asgn||!z||!(AT(z)&NOUN)||(t=eq(one,z),
-     all1(AT(z)&SPARSE?df1(t,atop(slash(ds(CSTARDOT)),ds(CCOMMA))):t)),EVASSERT);
- R z;
+F1(jtexec1)
+{
+	A z;
+	F1RANK(1, jtexec1, 0);
+	FDEPINC(1);
+	z = parse(tokens(vs(w)));
+	jt->asgn = 0;
+	FDEPDEC(1);
+	R z&&AT(z)&VERB + ADV + CONJ + MARK ? mtv : z;
 }
 
-static A jtcex(J jt,A w,AF f){A z; RE(w); z=f(jt,w); RESETERR; R z;}
-     /* conditional execute */
-
-F1(jtexg){A*v,*wv,x,y,z;I n,wd;
- RZ(w);
- n=AN(w); wv=AAV(w); wd=(I)w*ARELATIVE(w);
- ASSERT(n,EVLENGTH);
- ASSERT(1>=AR(w),EVRANK);
- if(VERB&AT(w))R w;
- ASSERT(BOX&AT(w),EVDOMAIN);
- GA(z,BOX,n,1,0); v=AAV(z);
- DO(n, x=WVR(i); RZ(*v++=(y=cex(x,jtfx))?y:exg(x)););
- R parse(z);
+F1(jtimmex)
+{
+	A z;
+	FDEPINC(1);
+	z = parse(tokens(w));
+	FDEPDEC(1);
+	if(EWTHROW == jt->jerr) {
+		RESETERR;
+		z = mtm;
+	}
+	if(z && !jt->asgn) {
+		jpr(z);
+	}
+	R z;
 }
 
-A jtjset(J jt,C*name,A x){R symbis(nfs((I)strlen(name),name),x,jt->global);}
+F1(jtimmea)
+{
+	A t, z;
+	z = immex(w);
+	ASSERT(jt->asgn || !z || !(AT(z)&NOUN) || (t = eq(one, z),
+			all1(AT(z)&SPARSE ? df1(t, atop(slash(ds(CSTARDOT)), ds(CCOMMA))) : t)), EVASSERT);
+	R z;
+}
 
-F2(jtapplystr){PROLOG;A fs,z;I d;
- F2RANK(1,RMAX,jtapplystr,0);
- RZ(fs=parse(tokens(vs(a))));
- ASSERT(VERB&AT(fs),EVSYNTAX);
- d=fdep(fs);
- FDEPINC(d); z=CALL1(VAV(fs)->f1,w,fs); FDEPDEC(d);
- EPILOG(z); 
+static A jtcex(J jt, A w, AF f)
+{
+	A z;
+	RE(w);
+	z = f(jt, w);
+	RESETERR;
+	R z;
+}
+/* conditional execute */
+
+F1(jtexg)
+{
+	A*v, *wv, x, y, z;
+	I n, wd;
+	RZ(w);
+	n = AN(w);
+	wv = AAV(w);
+	wd = (I)w * ARELATIVE(w);
+	ASSERT(n, EVLENGTH);
+	ASSERT(1 >= AR(w), EVRANK);
+	if(VERB & AT(w)) {
+		R w;
+	}
+	ASSERT(BOX & AT(w), EVDOMAIN);
+	GA(z, BOX, n, 1, 0);
+	v = AAV(z);
+	DO(n, x = WVR(i); RZ(*v++ = (y = cex(x, jtfx)) ? y : exg(x)););
+	R parse(z);
+}
+
+A jtjset(J jt, C*name, A x)
+{
+	R symbis(nfs((I)strlen(name), name), x, jt->global);
+}
+
+F2(jtapplystr)
+{
+	PROLOG;
+	A fs, z;
+	I d;
+	F2RANK(1, RMAX, jtapplystr, 0);
+	RZ(fs = parse(tokens(vs(a))));
+	ASSERT(VERB & AT(fs), EVSYNTAX);
+	d = fdep(fs);
+	FDEPINC(d);
+	z = CALL1(VAV(fs)->f1, w, fs);
+	FDEPDEC(d);
+	EPILOG(z);
 }    /* execute string a on argument w */
+

@@ -19,62 +19,170 @@
 #define COMPLOOPG(T,m,f) {COMPDCLP(T);int j; DO(m, if(j=f(x[i],y[i]))R 0<j?jt->compgt:jt->complt;);}
 #define COMPLOOQG(T,m,f) {COMPDCLQ(T);int j; DO(m, if(j=f(x[i],y[i]))R 0<j?jt->compgt:jt->complt;);}
 
-CF(compc){COMPLOOP (UC,jt->compn);          R a>b?1:-1;}
-CF(compu){COMPLOOP (US,jt->compn);          R a>b?1:-1;}
-CF(compi){COMPLOOP (I, jt->compn);          R a>b?1:-1;}
-CF(compd){COMPLOOP (D, jt->compn);          R a>b?1:-1;}
-CF(compa){COMPLOOPF(A, jt->compn,compare ); R a>b?1:-1;}
-CF(compr){COMPLOOPR(A1,jt->compn,compare ); R a>b?1:-1;}
-CF(compx){COMPLOOPG(X, jt->compn,xcompare); R a>b?1:-1;}
-CF(compq){COMPLOOPG(Q, jt->compn,QCOMP   ); R a>b?1:-1;}
-
-CF(compi1){I p=*(a+(I*)jt->compv),q=*(b+(I*)jt->compv); R p>q?jt->compgt:p<q?jt->complt:a>b?1:-1;}
-CF(compd1){D p=*(a+(D*)jt->compv),q=*(b+(D*)jt->compv); R p>q?jt->compgt:p<q?jt->complt:a>b?1:-1;}
-
-CF(compp){COMPDCLP(I);I*cv=jt->compsyv,xi,yi;
- DO(jt->compn, xi=x[cv[i]]; yi=y[cv[i]]; if(xi>yi)R 1; else if(xi<yi)R -1;);
- R a>b?1:-1;
+CF(compc)
+{
+	COMPLOOP (UC, jt->compn);
+	R a > b ? 1 : -1;
+}
+CF(compu)
+{
+	COMPLOOP (US, jt->compn);
+	R a > b ? 1 : -1;
+}
+CF(compi)
+{
+	COMPLOOP (I, jt->compn);
+	R a > b ? 1 : -1;
+}
+CF(compd)
+{
+	COMPLOOP (D, jt->compn);
+	R a > b ? 1 : -1;
+}
+CF(compa)
+{
+	COMPLOOPF(A, jt->compn, compare );
+	R a > b ? 1 : -1;
+}
+CF(compr)
+{
+	COMPLOOPR(A1, jt->compn, compare );
+	R a > b ? 1 : -1;
+}
+CF(compx)
+{
+	COMPLOOPG(X, jt->compn, xcompare);
+	R a > b ? 1 : -1;
+}
+CF(compq)
+{
+	COMPLOOPG(Q, jt->compn, QCOMP   );
+	R a > b ? 1 : -1;
 }
 
-int jtcompare(J jt,A a,A w){C*av,*wv;I ar,an,*as,at,c,d,j,m,t,wn,wr,*ws,wt;
- RZ(a&&w);
- an=AN(a); at=an?AT(a):B01; ar=AR(a); as=AS(a);
- wn=AN(w); wt=wn?AT(w):B01; wr=AR(w); ws=AS(w); RE(t=maxtype(at,wt));
- if(!HOMO(at,wt))R at&BOX?jt->compgt:wt&BOX?jt->complt:at&JCHAR?jt->compgt:wt&JCHAR?jt->complt:
-                   at&SBT?jt->compgt:jt->complt;
- if(ar!=wr)R ar>wr?jt->compgt:jt->complt;
- if(1<ar&&ICMP(1+as,1+ws,ar)){A s;I*v;
-  GA(s,INT,ar,1,0); v=AV(s);
-  DO(ar, v[i]=MAX(as[i],ws[i]);); v[0]=MIN(as[0],ws[0]);
-  RZ(a=take(s,a)); an=wn=AN(a);
-  RZ(w=take(s,w));
- }
- m=MIN(an,wn); 
- if(t&XNUM+RAT&&(at&FL+CMPX||wt&FL+CMPX)){A p,q;B*u,*v;
-  RZ(p=lt(a,w)); u=BAV(p);
-  RZ(q=gt(a,w)); v=BAV(q);
-  DO(m, if(u[i])R jt->complt; else if(v[i])R jt->compgt;);
- }else{
-  if(t!=at)RZ(a=cvt(t,a));
-  if(t!=wt)RZ(w=cvt(t,w));
-  av=CAV(a); wv=CAV(w);
-  switch(t){
-   default:   COMPLOOQ (UC,m  );         break;
-   case C2T:  COMPLOOQ (US,m  );         break;
-   case INT:  COMPLOOQ (I, m  );         break;
-   case FL:   COMPLOOQ (D, m  );         break;
-   case CMPX: COMPLOOQ (D, m+m);         break;
-   case XNUM: COMPLOOQG(X, m, xcompare); break;
-   case RAT:  COMPLOOQG(Q, m, QCOMP   ); break;
-   case BOX:  switch(2*ARELATIVE(a)+ARELATIVE(w)){ 
-    case 0: {COMPDCLQ(A);int j; DO(m, if(j=compare(        x[i],           y[i]   ))R j;);} break;
-    case 1: {COMPDCLQ(A);int j; DO(m, if(j=compare(        x[i],   (A)AABS(y[i],w)))R j;);} break;
-    case 2: {COMPDCLQ(A);int j; DO(m, if(j=compare((A)AABS(x[i],a),        y[i]   ))R j;);} break;
-    case 3: {COMPDCLQ(A);int j; DO(m, if(j=compare((A)AABS(x[i],a),(A)AABS(y[i],w)))R j;);} break;
- }}}
- if(1>=ar)R an>wn?jt->compgt:an<wn?jt->complt:0;
- DO(j=ar, --j; c=as[j]; d=ws[j]; if(c>d)R jt->compgt; else if (c<d)R jt->complt;);
- R 0;
+CF(compi1)
+{
+	I p = *(a + (I*)jt->compv), q = *(b + (I*)jt->compv);
+	R p > q ? jt->compgt : p < q ? jt->complt : a > b ? 1 : -1;
+}
+CF(compd1)
+{
+	D p = *(a + (D*)jt->compv), q = *(b + (D*)jt->compv);
+	R p > q ? jt->compgt : p < q ? jt->complt : a > b ? 1 : -1;
+}
+
+CF(compp)
+{
+	COMPDCLP(I);
+	I*cv = jt->compsyv, xi, yi;
+	DO(jt->compn, xi = x[cv[i]]; yi = y[cv[i]]; if(xi > yi)R 1; else if(xi < yi)R - 1;);
+	R a > b ? 1 : -1;
+}
+
+int jtcompare(J jt, A a, A w)
+{
+	C*av, *wv;
+	I ar, an, *as, at, c, d, j, m, t, wn, wr, *ws, wt;
+	RZ(a && w);
+	an = AN(a);
+	at = an ? AT(a) : B01;
+	ar = AR(a);
+	as = AS(a);
+	wn = AN(w);
+	wt = wn ? AT(w) : B01;
+	wr = AR(w);
+	ws = AS(w);
+	RE(t = maxtype(at, wt));
+	if(!HOMO(at, wt))R at&BOX ? jt->compgt : wt&BOX ? jt->complt : at&JCHAR ? jt->compgt : wt&JCHAR ? jt->complt :
+		at&SBT ? jt->compgt : jt->complt;
+	if(ar != wr) {
+		R ar > wr ? jt->compgt : jt->complt;
+	}
+	if(1 < ar && ICMP(1 + as, 1 + ws, ar)) {
+		A s;
+		I*v;
+		GA(s, INT, ar, 1, 0);
+		v = AV(s);
+		DO(ar, v[i] = MAX(as[i], ws[i]););
+		v[0] = MIN(as[0], ws[0]);
+		RZ(a = take(s, a));
+		an = wn = AN(a);
+		RZ(w = take(s, w));
+	}
+	m = MIN(an, wn);
+	if(t & XNUM + RAT && (at & FL + CMPX || wt & FL + CMPX)) {
+		A p, q;
+		B*u, *v;
+		RZ(p = lt(a, w));
+		u = BAV(p);
+		RZ(q = gt(a, w));
+		v = BAV(q);
+		DO(m, if(u[i])R jt->complt; else if(v[i])R jt->compgt;);
+	} else {
+		if(t != at) {
+			RZ(a = cvt(t, a));
+		}
+		if(t != wt) {
+			RZ(w = cvt(t, w));
+		}
+		av = CAV(a);
+		wv = CAV(w);
+		switch(t) {
+		default:
+			COMPLOOQ (UC, m  );
+			break;
+		case C2T:
+			COMPLOOQ (US, m  );
+			break;
+		case INT:
+			COMPLOOQ (I, m  );
+			break;
+		case FL:
+			COMPLOOQ (D, m  );
+			break;
+		case CMPX:
+			COMPLOOQ (D, m + m);
+			break;
+		case XNUM:
+			COMPLOOQG(X, m, xcompare);
+			break;
+		case RAT:
+			COMPLOOQG(Q, m, QCOMP   );
+			break;
+		case BOX:
+			switch(2 * ARELATIVE(a) + ARELATIVE(w)) {
+			case 0: {
+				COMPDCLQ(A);
+				int j;
+				DO(m, if(j = compare(        x[i],           y[i]   ))R j;);
+			}
+			break;
+			case 1: {
+				COMPDCLQ(A);
+				int j;
+				DO(m, if(j = compare(        x[i],   (A)AABS(y[i], w)))R j;);
+			}
+			break;
+			case 2: {
+				COMPDCLQ(A);
+				int j;
+				DO(m, if(j = compare((A)AABS(x[i], a),        y[i]   ))R j;);
+			}
+			break;
+			case 3: {
+				COMPDCLQ(A);
+				int j;
+				DO(m, if(j = compare((A)AABS(x[i], a), (A)AABS(y[i], w)))R j;);
+			}
+			break;
+			}
+		}
+	}
+	if(1 >= ar) {
+		R an > wn ? jt->compgt : an < wn ? jt->complt : 0;
+	}
+	DO(j = ar, --j; c = as[j]; d = ws[j]; if(c > d)R jt->compgt; else if (c < d)R jt->complt;);
+	R 0;
 }    /* compare 2 arbitrary dense arrays; _1 0 1 per a<w, a=w, a>w */
 
 
@@ -121,12 +229,13 @@ int jtcompare(J jt,A a,A w){C*av,*wv;I ar,an,*as,at,c,d,j,m,t,wn,wr,*ws,wt;
     case  0: DO(n, if(xa[i] <xb[i] )R lt; else if(xa[i] >xb[i] )R gt;); xa+=xc; ++ia; xb+=xc; ++ib;          \
  }}}
 
-COMPSPDS(compspdsB,B,0,                   e       )
-COMPSPDS(compspdsI,I,0,                   e       )
-COMPSPDS(compspdsD,D,0,                   e       )
-COMPSPDS(compspdsZ,D,*(1+(D*)jt->compsev),i%2?e1:e)
+COMPSPDS(compspdsB, B, 0,                   e       )
+COMPSPDS(compspdsI, I, 0,                   e       )
+COMPSPDS(compspdsD, D, 0,                   e       )
+COMPSPDS(compspdsZ, D, *(1+(D*)jt->compsev), i % 2 ? e1 : e)
 
-COMPSPSS(compspssB,B,0,                   e       )
-COMPSPSS(compspssI,I,0,                   e       )
-COMPSPSS(compspssD,D,0,                   e       )
-COMPSPSS(compspssZ,D,*(1+(D*)jt->compsev),i%2?e1:e)
+COMPSPSS(compspssB, B, 0,                   e       )
+COMPSPSS(compspssI, I, 0,                   e       )
+COMPSPSS(compspssD, D, 0,                   e       )
+COMPSPSS(compspssZ, D, *(1+(D*)jt->compsev), i % 2 ? e1 : e)
+

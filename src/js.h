@@ -165,12 +165,13 @@
 #endif
 
 #ifndef SYS     /* must be defined */
- error: "SYS must be defined"
+error: "SYS must be defined"
 #endif
 
 #if 1!=SY_WIN32+SY_LINUX+SY_MAC
- error: "one and only one of SY_WIN32, SY_LINUX, SY_MAC must be 1"
-#endif 
+error: "one and only one of SY_WIN32, SY_LINUX, SY_MAC must be 1"
+#endif
 
 #endif /* only include once */
+
 

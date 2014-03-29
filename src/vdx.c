@@ -7,9 +7,12 @@
 #include "ve.h"
 
 
-DXF2(jtdxplus){DX z=zeroDX;
- R z;
+DXF2(jtdxplus)
+{
+	DX z = zeroDX;
+	R z;
 }
 
 
-APFX(plusDX, DX,DX,DX, dxplus )
+APFX(plusDX, DX, DX, DX, dxplus )
+
