@@ -1,5 +1,7 @@
 .PHONY: build install test
 
+# Loads test script utilities, runs the file w/ 0!:3, and reports whether it
+# was successful or not.
 TESTSCRIPT:=(({&('fail|',:'pass|'))@>@{. , >@{:) (<@(0!:3)@<,<@]) 'FILE' [load 'tsu.ijs'
 TESTS:=$(patsubst test/%,test-%,$(wildcard test/*))
 
