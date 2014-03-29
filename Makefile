@@ -1,4 +1,7 @@
-.PHONY: build install test
+.PHONY: build install test $(wildcard test/*.ijs)
+
+TESTSCRIPT:=(({&('fail|',:'pass|'))@>@{. , >@{:) (<@(0!:3)@<,<@]) 'FILE' [load 'tsu.ijs'
+TESTS:=$(patsubst test/%,test-%,$(wildcard test/*))
 
 build:
 	mkdir -p build
@@ -10,5 +13,7 @@ install:
 	cp build/jlang j/bin
 	cp build/libtsdll.so .
 
-test:
-	j/bin/jlang < test-runner.ijs
+test: $(TESTS)
+
+test-%.ijs: test/%.ijs
+	@echo "$(subst FILE,$<,$(TESTSCRIPT))" | j/bin/jlang | sed 's/^ \+//'

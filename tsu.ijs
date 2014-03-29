@@ -1,15 +1,17 @@
 NB. test script utilities -----------------------------------------------
 
-1=#$ testpath  NB. testpath must already be defined as path to tests (with final / or \) before loading tsu.ijs
+testpath=: jpath (1!:43''),'/test/' NB. 1!:43 current directory
 
-testfiles=: 3 : 0   NB. y. is prefix - e.g., 'g' or 'gm' or 'gs'
- testpath&,&.> /:~ {."1 [1!:0 testpath,y,'*.ijs'
-)
-
-ddall    =: testfiles 'g'           NB. all
-ddgmbx   =: testfiles 'gmbx'        NB. map boxed arrays
-ddgsp    =: testfiles 'gsp'         NB. sparse arrays
-ddg      =: ddall -. ddgmbx,ddgsp   NB. "ordinary"
+NB. 1=#$ testpath  NB. testpath must already be defined as path to tests (with final / or \) before loading tsu.ijs
+NB. 
+NB. testfiles=: 3 : 0   NB. y. is prefix - e.g., 'g' or 'gm' or 'gs'
+NB.  testpath&,&.> /:~ {."1 [1!:0 testpath,y,'*.ijs'
+NB. )
+NB. 
+NB. ddall    =: testfiles 'g'           NB. all
+NB. ddgmbx   =: testfiles 'gmbx'        NB. map boxed arrays
+NB. ddgsp    =: testfiles 'gsp'         NB. sparse arrays
+NB. ddg      =: ddall -. ddgmbx,ddgsp   NB. "ordinary"
 
 etx      =: 1 : 'x :: (<:@(13!:11)@i.@0: >@{ 9!:8@i.@0:)'
 ex       =: ". etx
