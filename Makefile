@@ -1,4 +1,4 @@
-.PHONY: build install test $(wildcard test/*.ijs)
+.PHONY: build install test
 
 TESTSCRIPT:=(({&('fail|',:'pass|'))@>@{. , >@{:) (<@(0!:3)@<,<@]) 'FILE' [load 'tsu.ijs'
 TESTS:=$(patsubst test/%,test-%,$(wildcard test/*))
