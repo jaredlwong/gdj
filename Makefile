@@ -16,10 +16,10 @@ build:
 	cd build && make tsdll
 
 install:
-	cp build/jlang j/bin
-	cp build/libtsdll.so test
+	cp build/jlang jenv/bin
+#	cp build/libtsdll.so test
 
 test: $(TESTS)
 
 test-%.ijs: test/unit/%.ijs
-	@echo "$(subst FILE,$<,$(TESTSCRIPT))" | j/bin/jlang | sed 's/^ \+//'
+	@echo "$(subst FILE,$<,$(TESTSCRIPT))" | jenv/bin/jlang | sed 's/^ \+//'

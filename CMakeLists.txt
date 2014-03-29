@@ -21,4 +21,4 @@ target_link_libraries (jlang m dl)
 # add_executable (jconsole ${JCONSOLE_SOURCES} ${LIBJ_HEADERS})
 # target_link_libraries (jconsole dl)
  
-add_library (tsdll SHARED test/tsdll.c)
+# add_library (tsdll SHARED test/tsdll.c)
