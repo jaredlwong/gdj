@@ -5,8 +5,8 @@ include_directories(src)
 
 set (CMAKE_C_FLAGS "-fPIC -O3 -fno-strict-aliasing -DNOASM -D_UNIX64")
 
-file(GLOB SOURCES src/*.c)
-file(GLOB HEADERS src/*.h)
+file(GLOB SOURCES src2/*.c)
+file(GLOB HEADERS src2/*.h)
 
 add_executable (jlang ${SOURCES} ${HEADERS})
 target_link_libraries (jlang m dl)
