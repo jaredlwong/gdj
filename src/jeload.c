@@ -193,7 +193,6 @@ int jefirst(int type,char* arg)
 	}
 	*q=0;
 	strcat(input,"'");
-	printf("INPUT:%s\n", input);
 	r=jedo(input);
 	free(input);
 	return r;
