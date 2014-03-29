@@ -93,64 +93,75 @@ char* _stdcall Jinput(J jt,char* prompt){
 /* J calls for output */
 void _stdcall Joutput(J jt,int type, char* s)
 {
- if(MTYOEXIT==type)
- {
-#ifdef READLINE
-  rlexit((int)(I)s);
-#endif
-  exit((int)(I)s);
- }
- fputs(s,stdout);
- fflush(stdout);
+	if (MTYOEXIT == type)
+	{
+		exit((int)(I)s);
+	}
+	fputs(s, stdout);
+	fflush(stdout);
 }
 
 void addargv(int argc, char* argv[], C* d)
 {
- C *p,*q; I i;
+	C *p, *q;
+	I i;
 
- p=d+strlen(d);
- for(i=0;i<argc;++i)
- {
-  if(sizeof(input)<(100+strlen(d)+2*strlen(argv[i]))) exit(100);
-  if(1==argc){*p++=',';*p++='<';}
-  if(i)*p++=';';	
-  *p++='\'';
-  q=argv[i];
-  while(*q)
-  {
-   *p++=*q++;
-   if('\''==*(p-1))*p++='\'';
-  }
-  *p++='\'';
- } 
- *p=0;
+	p = d + strlen(d);
+	for(i=0;i<argc;++i) {
+		if (sizeof(input) < (100 + strlen(d) + 2 * strlen(argv[i]))) {
+			exit(100);
+		}
+		if (1 == argc) {
+			*p++ = ',';
+			*p++ = '<';
+		}
+		if (i) {
+			*p++ = ';';	
+		}
+		*p++ = '\'';
+		q = argv[i];
+		while (*q) {
+			*p++ = *q++;
+			if ('\'' == *(p-1)) {
+				*p++ = '\'';
+			}
+		}
+		*p++ = '\'';
+	} 
+	*p = 0;
 }
 
 J jt;
 
 int main(int argc, char* argv[])
 {
- void* callbacks[] = {Joutput,0,Jinput,0,(void*)SMCON}; int type;
+	void* callbacks[] = { Joutput, 0, Jinput, 0, (void*)SMCON};
+	int type;
 
- jepath(argv[0]);     // get path to JFE folder
- jt=jeload(callbacks);
- if(!jt){char m[1000]; jefail(m), fputs(m,stdout); exit(1);}
- adadbreak=(char**)jt; // first address in jt is address of breakdata
- signal(SIGINT,sigint);
+	jepath(argv[0]);     // get path to JFE folder
+	jt = jeload(callbacks);
+	if (!jt) {
+		char m[1000];
+		jefail(m), fputs(m,stdout);
+		exit(1);
+	}
+
+	adadbreak = (char**)jt; // first address in jt is address of breakdata
+	signal(SIGINT, sigint);
  
-#ifdef READLINE
- char* rl_readline_name="jconsole"; /* argv[0] varies too much*/
-#endif
+	if (argc == 2 && !strcmp(argv[1], "-jprofile")) {
+		type = 3;
+	} else if (argc > 2 && !strcmp(argv[1], "-jprofile")) {
+		type = 1;
+	} else {
+		type = 0;
+	}
 
- if(argc==2&&!strcmp(argv[1],"-jprofile"))
-	 type=3;
- else if(argc>2&&!strcmp(argv[1],"-jprofile"))
-	 type=1;
- else
-	 type=0;
- addargv(argc,argv,input+strlen(input));
- jefirst(type,input);
- while(1){jedo(Jinput(jt,"   "));}
- jefree();
- return 0;
+	addargv(argc,argv,input+strlen(input));
+	jefirst(type,input);
+	while (1) {
+		jedo(Jinput(jt,"   "));
+	}
+	jefree();
+	return 0;
 }

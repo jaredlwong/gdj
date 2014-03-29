@@ -32,6 +32,8 @@
 #endif
 #include "j.h"
 
+#include <stdio.h>
+
 static void* hjdll;
 static J jt;
 static JDoType jdo;
@@ -54,85 +56,74 @@ void* jehjdll(){return hjdll;}
 // load JE, Jinit, getprocaddresses, JSM
 J jeload(void* callbacks)
 {
-#ifdef _WIN32
- WCHAR wpath[PLEN];
- MultiByteToWideChar(CP_UTF8,0,pathdll,1+(int)strlen(pathdll),wpath,PLEN);
- hjdll=LoadLibraryW(wpath);
-#else
- hjdll=dlopen(pathdll,RTLD_LAZY);
-#endif
- if(!hjdll)return 0;
- jt=((JInitType)GETPROCADDRESS(hjdll,"JInit"))();
- if(!jt) return 0;
- ((JSMType)GETPROCADDRESS(hjdll,"JSM"))(jt,callbacks);
- jdo=(JDoType)GETPROCADDRESS(hjdll,"JDo");
- jfree=(JFreeType)GETPROCADDRESS(hjdll,"JFree");
- jga=(JgaType)GETPROCADDRESS(hjdll,"Jga");
- jgetlocale=(JGetLocaleType)GETPROCADDRESS(hjdll,"JGetLocale");
- return jt;
+	hjdll=dlopen(pathdll,RTLD_LAZY);
+	if(!hjdll)return 0;
+	jt=((JInitType)GETPROCADDRESS(hjdll,"JInit"))();
+	if(!jt) return 0;
+	((JSMType)GETPROCADDRESS(hjdll,"JSM"))(jt,callbacks);
+	jdo=(JDoType)GETPROCADDRESS(hjdll,"JDo");
+	jfree=(JFreeType)GETPROCADDRESS(hjdll,"JFree");
+	jga=(JgaType)GETPROCADDRESS(hjdll,"Jga");
+	jgetlocale=(JGetLocaleType)GETPROCADDRESS(hjdll,"JGetLocale");
+	return jt;
 }
 
 // set path and pathdll (wpath also set for win)
 // WIN arg is 0, Unix arg is argv[0]
 void jepath(char* arg)
 {
-#ifdef _WIN32
- WCHAR wpath[PLEN];
- GetModuleFileNameW(0,wpath,_MAX_PATH);
- *(wcsrchr(wpath, '\\')) = 0;
- WideCharToMultiByte(CP_UTF8,0,wpath,1+(int)wcslen(wpath),path,PLEN,0,0);
-#else
 
 #define sz 4000
- char arg2[sz],arg3[sz];
- char* src,*snk;int n,len=sz;
- // fprintf(stderr,"arg0 %s\n",arg);
- // try host dependent way to get path to executable
- // use arg if they fail (arg command in PATH won't work)
+	char arg2[sz],arg3[sz];
+	char* src,*snk;int n,len=sz;
+	// fprintf(stderr,"arg0 %s\n",arg);
+	// try host dependent way to get path to executable
+	// use arg if they fail (arg command in PATH won't work)
 #ifdef __MACH__ 
- n=_NSGetExecutablePath(arg2,&len);
- if(0!=n) strcat(arg2,arg);
+	n=_NSGetExecutablePath(arg2,&len);
+	if(0!=n) strcat(arg2,arg);
 #else
- n=readlink("/proc/self/exe",arg2,sizeof(arg2));
- if(-1==n) strcpy(arg2,arg); else arg2[n]=0;
+	n=readlink("/proc/self/exe",arg2,sizeof(arg2));
+	if(-1==n) strcpy(arg2,arg); else arg2[n]=0;
 #endif
- // fprintf(stderr,"arg2 %s\n",arg2);
- // arg2 is path (abs or relative) to executable or soft link
- n=readlink(arg2,arg3,sz);
- if(-1==n) strcpy(arg3,arg2); else arg3[n]=0;
- // fprintf(stderr,"arg3 %s\n",arg3);
- if('/'==*arg3)
-  strcpy(path,arg3);
- else
- {
-  getcwd(path,sizeof(path));
-  strcat(path,"/");
-  strcat(path,arg3);
- }
- *(1+strrchr(path,'/'))=0;
- // remove ./ and backoff ../
- snk=src=path;
- while(*src)
- {
-	 if('/'==*src&&'.'==*(1+src)&&'.'==*(2+src)&&'/'==*(3+src))
-	 {
-		 *snk=0;
-		 snk=strrchr(path,'/');
-		 snk=0==snk?path:snk;
-		 src+=3;
-	 }
-	 else if('/'==*src&&'.'==*(1+src)&&'/'==*(2+src))
-      src+=2;
-	 else
-	  *snk++=*src++;
- }
- *snk=0;
- snk=path+strlen(path)-1;
- if('/'==*snk) *snk=0;
-#endif
- strcpy(pathdll,path);
- strcat(pathdll,JDLLNAME);
- // fprintf(stderr,"arg4 %s\n",path);
+	// fprintf(stderr,"arg2 %s\n",arg2);
+	// arg2 is path (abs or relative) to executable or soft link
+	n=readlink(arg2,arg3,sz);
+	if(-1==n) strcpy(arg3,arg2); else arg3[n]=0;
+	// fprintf(stderr,"arg3 %s\n",arg3);
+	if('/'==*arg3)
+		strcpy(path,arg3);
+	else
+	{
+		getcwd(path,sizeof(path));
+		strcat(path,"/");
+		strcat(path,arg3);
+	}
+	*(1+strrchr(path,'/'))=0;
+	// remove ./ and backoff ../
+	snk=src=path;
+	while(*src)
+	{
+		if('/'==*src&&'.'==*(1+src)&&'.'==*(2+src)&&'/'==*(3+src))
+		{
+			*snk=0;
+			snk=strrchr(path,'/');
+			snk=0==snk?path:snk;
+			src+=3;
+		}
+		else if('/'==*src&&'.'==*(1+src)&&'/'==*(2+src))
+			src+=2;
+		else
+			*snk++=*src++;
+	}
+	*snk=0;
+	snk=path+strlen(path)-1;
+	if('/'==*snk) *snk=0;
+	strcpy(pathdll,path);
+	strcat(pathdll,JDLLNAME);
+
+	printf("path %s pathdll %s\n", path, pathdll);
+	// fprintf(stderr,"arg4 %s\n",path);
 }
 
 // called by jwdp (java jnative.c) to set path
