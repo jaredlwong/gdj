@@ -6,7 +6,7 @@ Session.vim
 *~
 
 build
-jlang
+gdj
 libtsdll.so
 q.jmf
 r.jmf

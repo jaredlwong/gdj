@@ -1,0 +1,22 @@
+GDJ is a fork of the original J language implementation.
+Copyright (c) 2014 Jared Wong <jaredlwong@gmail.com>
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 3 of the License, or (at your option) any later
+version.
+
+This project incorporates work covered by the following copyright notice:
+
+	JSOFTWARE SOURCES refers to all files in this Jsoftware release package
+	except for file gpl3.txt.
+	
+	JSOFTWARE SOURCES are: Copyright 1990-2011, Jsoftware Inc.  All rights
+	reserved.
+	
+	JSOFTWARE SOURCES are: Licensed under GNU General Public License as
+	published by the Free Software Foundation, either version 3 of the
+	License, or (at your option) any later version.
+	
+	See gpl3.txt for GNU General Public License version 3.  Additional info
+	at http://www.gnu.org/licenses.
