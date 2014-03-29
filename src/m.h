@@ -16,11 +16,7 @@
 #define MALLOC(n) malloc(n)
 #endif
 
-typedef struct {
-	I*a;
-	S j;
-	C mflag, unused;
-} MS;
+typedef struct {I*a;S j;C mflag,unused;} MS;
 
 /* layout of the two words before every A array                            */
 /* a: ptr to next block (when in free list)                                */
@@ -33,4 +29,3 @@ typedef struct {
 
 extern I mhb;
 extern I mhw;
-

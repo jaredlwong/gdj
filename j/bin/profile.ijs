@@ -20,25 +20,27 @@ break=.   user,'/break'
 snap=.    user,'/snap'
 temp=.    user,'/temp'
 config=.  user,'/config'
-ids=. ;:'addons bin break config home install snap system tools temp user'
+ids=: ;:'addons bin break config home install snap system tools temp user'
+NB. ids=. ;:'addons bin break config home install snap system tools temp user'
 
 0!:0 :: ] <jpathsep bin,'/profilex.ijs' NB. override
 
-SystemFolders_j_=: ids,.jpathsep@".&.>ids
+ids,.jpathsep@".&.>ids
+NB. SystemFolders_j_=: ids,.jpathsep@".&.>ids
 
-md=. 3 : 0 NB. recursive makedir
-a=. jpathsep y,'/'
-if. -.#1!:0 }:a do.
- for_n. I. a='/' do. 1!:5 :: [ <n{.a end.
-end.
-)
-
-NB. try to ensure user folders exist
-md user,'/projects'
-md temp
-md break
-md config
-md snap
-
-NB. boot up J and load startup.ijs if it exists
-0!:0 <jpathsep system,'/util/boot.ijs'
+NB. md=. 3 : 0 NB. recursive makedir
+NB. a=. jpathsep y,'/'
+NB. if. -.#1!:0 }:a do.
+NB.  for_n. I. a='/' do. 1!:5 :: [ <n{.a end.
+NB. end.
+NB. )
+NB. 
+NB. NB. try to ensure user folders exist
+NB. md user,'/projects'
+NB. md temp
+NB. md break
+NB. md config
+NB. md snap
+NB. 
+NB. NB. boot up J and load startup.ijs if it exists
+NB. 0!:0 <jpathsep system,'/util/boot.ijs'

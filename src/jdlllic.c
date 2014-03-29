@@ -7,18 +7,8 @@
 #include "j.h"
 #endif
 
-F1(jtlock1)
-{
-	ASSERT(0, EVDOMAIN);   /* no encode */
-}
+F1(jtlock1){ASSERT(0,EVDOMAIN);} /* no encode */
 
-F2(jtlock2)
-{
-	ASSERT(0, EVDOMAIN);   /* no decode */
-}
+F2(jtlock2){ASSERT(0,EVDOMAIN);} /* no decode */
 
-F2(jtunlock2)
-{
-	R w;   /* leave alone */
-}
-
+F2(jtunlock2){R w;} /* leave alone */

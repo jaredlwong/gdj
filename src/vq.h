@@ -29,4 +29,3 @@ extern QF2(jtqplus);
 extern QF2(jtqtymes);
 
 extern Q zeroQ;
-

@@ -7,8 +7,6 @@
 #include "ve.h"
 
 
-B jtspmult(J jt, A*z, A a, A w, C id, I af, I acr, I wf, I wcr)
-{
-	R 0;
+B jtspmult(J jt,A*z,A a,A w,C id,I af,I acr,I wf,I wcr){
+ R 0;
 }    /* scalar dyadic fns with one or both arguments sparse */
-

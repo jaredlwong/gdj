@@ -46,13 +46,12 @@ extern XF2(jtxplus);
 extern XF2(jtxpow);
 extern XF2(jtxtymes);
 
-extern X   jtxc(J, I);
-extern int jtxcompare(J, X, X);
-extern X   jtxdiv(J, X, X, I);
-extern B   jtxdivrem(J, X, X, X*, X*);
-extern X   jtxev1(J, A, C*);
-extern X   jtxev2(J, A, A, C*);
-extern I   jtxint(J, X);
-extern D   jtxlogabs(J, X);
-extern X   jtxrem(J, X, X);
-
+extern X   jtxc(J,I);
+extern int jtxcompare(J,X,X);
+extern X   jtxdiv(J,X,X,I);
+extern B   jtxdivrem(J,X,X,X*,X*);
+extern X   jtxev1(J,A,C*);
+extern X   jtxev2(J,A,A,C*);
+extern I   jtxint(J,X);
+extern D   jtxlogabs(J,X);
+extern X   jtxrem(J,X,X);

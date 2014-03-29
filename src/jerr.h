@@ -46,4 +46,3 @@
 #define EWRAT           53      /* rational   result           */
 #define EWDIV0          54      /* division by zero            */
 #define EWTHROW         55      /* throw. executed             */
-

@@ -33,7 +33,7 @@ __asm        loop pvv20                 \
 __asm        jmp  pvv40                 \
 __asm pvv30: mov  er,EWOV               \
 __asm pvv40:                            \
-}
+}   
 
 #define PLUS1V(n,z,u,y)                 \
 {                                       \
@@ -416,34 +416,34 @@ __asm  ts40:                            \
 #if SY_64 /* win64 and linux64 asm routines */
 #define OVF
 
-C asmplusvv(I, I*, I*, I*);
-C asmminusvv(I, I*, I*, I*);
-C asmtymesvv(I, I*, I*, I*);
+C asmplusvv(I,I*,I*,I*);
+C asmminusvv(I,I*,I*,I*);
+C asmtymesvv(I,I*,I*,I*);
 
-C asmplus1v(I, I*, I, I*);
-C asmminus1v(I, I*, I, I*);
-C asmtymes1v(I, I*, I, I*);
+C asmplus1v(I,I*,I,I*);
+C asmminus1v(I,I*,I,I*);
+C asmtymes1v(I,I*,I,I*);
 
-C asmminusv1(I, I*, I*, I);
+C asmminusv1(I,I*,I*,I);
 
-C asmplusr(I, I*, I*);
-C asmminusr(I, I*, I*);
-C asmtymesr(I, I*, I*);
+C asmplusr(I,I*,I*);
+C asmminusr(I,I*,I*);
+C asmtymesr(I,I*,I*);
 
-C asmplusrv(I, I*, I*);
-C asmminusrv(I, I*, I*);
-C asmtymesrv(I, I*, I*);
+C asmplusrv(I,I*,I*);
+C asmminusrv(I,I*,I*);
+C asmtymesrv(I,I*,I*);
+ 
+C asmpluss(I,I*,I*);
+C asmminuss(I,I*,I*);
+C asmtymess(I,I*,I*);
 
-C asmpluss(I, I*, I*);
-C asmminuss(I, I*, I*);
-C asmtymess(I, I*, I*);
+C asmplusp(I,I*,I*);
+C asmminusp(I,I*,I*);
+C asmtymesp(I,I*,I*);
 
-C asmplusp(I, I*, I*);
-C asmminusp(I, I*, I*);
-C asmtymesp(I, I*, I*);
-
-C asminnerprod(I, I*, I*, I*, I);
-C asminnerprodx(I, I*, I, I*);
+C asminnerprod(I,I*,I*,I*,I);
+C asminnerprodx(I,I*,I,I*);
 
 #define  PLUSVV(m,z,x,y) er=asmplusvv(m,z,x,y)
 #define MINUSVV(m,z,x,y) er=asmminusvv(m,z,x,y)
@@ -461,17 +461,17 @@ C asminnerprodx(I, I*, I, I*);
 #define MINUSV1(n,z,x,v) er=asmminusv1(n,z,x,v)
 #define TYMESV1(n,z,x,v) TYMES1V(n,z,v,x)
 
-#define  PLUSR(n,z,x)    er=asmplusr(n,z,x)
-#define MINUSR(n,z,x)    er=asmminusr(n,z,x)
-#define TYMESR(n,z,x)    er=asmtymesr(n,z,x)
+#define  PLUSR(n,z,x)    er=asmplusr(n,z,x) 
+#define MINUSR(n,z,x)    er=asmminusr(n,z,x) 
+#define TYMESR(n,z,x)    er=asmtymesr(n,z,x) 
 
-#define  PLUSS(n,z,x)    er=asmpluss(n,z,x)
-#define MINUSS(n,z,x)    er=asmminuss(n,z,x)
-#define TYMESS(n,z,x)    er=asmtymess(n,z,x)
+#define  PLUSS(n,z,x)    er=asmpluss(n,z,x) 
+#define MINUSS(n,z,x)    er=asmminuss(n,z,x) 
+#define TYMESS(n,z,x)    er=asmtymess(n,z,x) 
 
-#define  PLUSP(n,z,x)    er=asmplusp(n,z,x)
-#define MINUSP(n,z,x)    er=asmminusp(n,z,x)
-#define TYMESP(n,z,x)    er=asmtymesp(n,z,x)
+#define  PLUSP(n,z,x)    er=asmplusp(n,z,x) 
+#define MINUSP(n,z,x)    er=asmminusp(n,z,x) 
+#define TYMESP(n,z,x)    er=asmtymesp(n,z,x) 
 
 #endif
 
@@ -515,4 +515,3 @@ C asminnerprodx(I, I*, I, I*);
 #define TYMESS(n,z,x)      {DI t=1;    x+=n; z+=n; DO(n, --x;        t*=*x; *--z=(I)t; BOV(t<IMIN||IMAX<t ););}
 
 #endif
-

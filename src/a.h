@@ -8,7 +8,7 @@
 #define GINSERT         (I)3
 #define GTRAIN          (I)6
 
-#define COMPOSE(c)  ((c)==CAT||(c)==CATCO||(c)==CAMP||(c)==CAMPCO)
+#define COMPOSE(c)  ((c)==CAT||(c)==CATCO||(c)==CAMP||(c)==CAMPCO) 
 
 #define CONJCASE(a,w)   (2*!(VERB&AT(a))+!(VERB&AT(w)))
 #define NN              3               /* NOUN NOUN                       */
@@ -46,4 +46,3 @@
 #define SCALARFN(id,w)  (id==ID(w)&&!lr(w)&&!rr(w))
 
 #define FIT0(c,v)       (CFIT==v->id&&c==ID(v->f)&&equ(zero,v->g))
-

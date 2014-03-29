@@ -6,7 +6,7 @@
 #define U unsigned
 
 #if (SYS & SYS_UNIX)
-#define _stdcall
+#define _stdcall      
 #endif
 
 #if SY_64
@@ -38,27 +38,16 @@ typedef double             D;
 typedef FILE*              F;
 
 typedef long double        LD;
-typedef struct {
-	I k, flag, m, t, c, n, r, s[1];
-}* A;
-typedef struct {
-	A a, t;
-} TA;
+typedef struct {I k,flag,m,t,c,n,r,s[1];}* A;
+typedef struct {A a,t;}TA;
 typedef A                (*AF)();
 typedef UI               (*UF)();
 typedef void             (*VF)();
 typedef int              (*CMP)();    /* comparison function in sort     */
 typedef A                  X;
-typedef struct {
-	X n, d;
-}    Q;
-typedef struct {
-	D re, im;
-}  Z;
-typedef union {
-	D d;
-	UINT i[2];
-} DI;
+typedef struct {X n,d;}    Q;
+typedef struct {D re,im;}  Z;
+typedef union {D d;UINT i[2];} DI;
 
 #if (SYS & SYS_PC+SYS_MACINTOSH)        /* for use by the session manager  */
 typedef S SI;
@@ -172,11 +161,7 @@ typedef I SI;
 #define RELOCATE(w,z)   (ARELATIVE(w)?relocate((I)(w)-(I)(z),(z)):(z))
 
 
-typedef struct {
-	I i;
-	US n, go, source;
-	C type;
-} CW;
+typedef struct {I i;US n,go,source;C type;} CW;
 
 /* control word (always has corresponding token string)                             */
 /* type   - as specified in w.h                                            */
@@ -191,32 +176,29 @@ typedef struct {
 #define DCCALL   3      /* verb/adv/conj call  -- dbunquote()                           */
 #define DCJUNK   4      /* stack entry is obsolete                                      */
 
-typedef struct DS {     /* 1 2 3                                                        */
-	struct DS*dclnk;       /* x x x  link to next stack entry                              */
-	A dca;                 /*     x  fn/op name                                            */
-	A dcf;                 /*     x  fn/op                                                 */
-	A dcx;                 /*     x  left argument                                         */
-	A dcy;                 /* x x x  tokens; text        ; right argument                  */
-	A dcloc;               /*     x  local symb table (0 if not explicit)                  */
-	A dcc;                 /*     x  control matrix   (0 if not explicit)                  */
-	I dci;                 /* x x x  index ; next index  ; ptr to line #                   */
-	I dcj;                 /*   x x        ; prev index  ; error #                         */
-	I dcn;                 /*   x x        ; line #      ; ptr to symb entry               */
-	I dcm;                 /*   x x        ; script index; # of non-locale part of name    */
-	I dcstop;              /*     x  the last stop in this function                        */
-	C dctype;              /* x x x  type of entry (see #define DC*)                       */
-	B dcsusp;              /* x   x  1 iff begins a debug suspension                       */
-	C dcss;                /*     x  single step code                                      */
+typedef struct DS{      /* 1 2 3                                                        */
+ struct DS*dclnk;       /* x x x  link to next stack entry                              */
+ A dca;                 /*     x  fn/op name                                            */
+ A dcf;                 /*     x  fn/op                                                 */
+ A dcx;                 /*     x  left argument                                         */
+ A dcy;                 /* x x x  tokens; text        ; right argument                  */
+ A dcloc;               /*     x  local symb table (0 if not explicit)                  */
+ A dcc;                 /*     x  control matrix   (0 if not explicit)                  */
+ I dci;                 /* x x x  index ; next index  ; ptr to line #                   */
+ I dcj;                 /*   x x        ; prev index  ; error #                         */
+ I dcn;                 /*   x x        ; line #      ; ptr to symb entry               */
+ I dcm;                 /*   x x        ; script index; # of non-locale part of name    */
+ I dcstop;              /*     x  the last stop in this function                        */
+ C dctype;              /* x x x  type of entry (see #define DC*)                       */
+ B dcsusp;              /* x   x  1 iff begins a debug suspension                       */
+ C dcss;                /*     x  single step code                                      */
 } DST;
 
 typedef DST* DC;
 
 
-typedef struct {
-	I e, p;
-	X x;
-} DX;
-/* for the p field in DX */
+typedef struct {I e,p;X x;} DX;
+                                /* for the p field in DX */
 #define DXIPREC         ((I)-1) /* infinite precision    */
 #define DXINF           ((I)-2) /* _  infinity           */
 #define DXMINF          ((I)-3) /* __ negative infinity  */
@@ -233,10 +215,7 @@ typedef struct {
 /*        decimal point after last digit                                   */
 
 
-typedef struct {
-	A name, val;
-	I flag, sn, next, prev;
-} L;
+typedef struct {A name,val;I flag,sn,next,prev;} L;
 
 /* symbol pool entry                           LINFO entry                 */
 /* name - name on LHS of assignment         or locale name                 */
@@ -251,11 +230,7 @@ typedef struct {
 #define LINFO           (I)4            /* locale info                     */
 
 
-typedef struct {
-	A og, g;
-	I ptr, flag;
-	B sw0;
-} LS;
+typedef struct{A og,g;I ptr,flag;B sw0;} LS;
 
 /* og:   old value of global                                               */
 /* g:    global at this level                                              */
@@ -266,13 +241,7 @@ typedef struct {
 /* sw0:  old value of stswitched                                           */
 
 
-typedef struct {
-	UI hash;
-	I sn;
-	L*e;
-	UC m;
-	C flag, s[1];
-} NM;
+typedef struct{UI hash;I sn;L*e;UC m;C flag,s[1];} NM;
 
 /* hash: hash for  non-locale part of name                                 */
 /* m:    length of non-locale part of name                                 */
@@ -285,9 +254,7 @@ typedef struct {
 #define NMDOT           4       /* one of the names m. n. u. v. x. y.      */
 
 
-typedef struct {
-	I a, e, i, x;
-} P;
+typedef struct {I a,e,i,x;} P;
 
 /* value fields of sparse array types                                      */
 /* fields are offsets from beginning of the P struct                       */
@@ -302,61 +269,56 @@ typedef struct {
 
 /* performance monitoring stuff */
 
-typedef struct {
-	A name;                /* verb/adverb/conjunction name                    */
-	A loc;                 /* locale name                                     */
-	I lc;                  /* line number (-1 for entry; -2 for exit)         */
-	I s;                   /* space                                           */
-	I t[2];                /* time                                            */
-	C val;                 /* valence: 1 or 2                                 */
-	C unused[3];           /* padding                                         */
+typedef struct{
+ A name;                /* verb/adverb/conjunction name                    */
+ A loc;                 /* locale name                                     */
+ I lc;                  /* line number (-1 for entry; -2 for exit)         */
+ I s;                   /* space                                           */
+ I t[2];                /* time                                            */
+ C val;                 /* valence: 1 or 2                                 */
+ C unused[3];           /* padding                                         */
 } PM;
 
 #define PMCOL  6        /* # of fields in PM                               */
 
-typedef struct {
-	I n;                   /* maximum number of records                       */
-	I i;                   /* index of next record to be written              */
-	I s;                   /* initial bytesmax value                          */
-	B rec;                 /* what to record (0 entry & exit; 1 all)          */
-	B trunc;               /* what to do on overflow (0 wrap; 1 truncate)     */
-	B wrapped;             /* 1 iff wrapping has happened                     */
-	C unused[1];           /* padding                                         */
+typedef struct{
+ I n;                   /* maximum number of records                       */
+ I i;                   /* index of next record to be written              */
+ I s;                   /* initial bytesmax value                          */
+ B rec;                 /* what to record (0 entry & exit; 1 all)          */
+ B trunc;               /* what to do on overflow (0 wrap; 1 truncate)     */
+ B wrapped;             /* 1 iff wrapping has happened                     */
+ C unused[1];           /* padding                                         */
 } PM0;
 
 
 /* each unique symbol has a row in jt->sbu                                 */
 /* a row is interpreted per SBU                                            */
 /* for best results make sizeof(SBU) a multiple of sizeof(I)               */
-
-typedef struct {
-	I  i;                  /* index into sbs                                  */
-	I  n;                  /* length                                          */
-	UI h;                  /* hash value                                      */
-	I  color;              /* binary tree: color                              */
-	I  parent;             /* binary tree: index of parent                    */
-	I  left;               /* binary tree: index of left  child               */
-	I  right;              /* binary tree: index of right child               */
-	I  order;              /* order number                                    */
-	I  down;               /* predecessor in ordering                         */
-	I  up;                 /* successor   in ordering                         */
-	I  flag;               /* bit flags                                       */
+ 
+typedef struct{
+ I  i;                  /* index into sbs                                  */
+ I  n;                  /* length                                          */
+ UI h;                  /* hash value                                      */
+ I  color;              /* binary tree: color                              */
+ I  parent;             /* binary tree: index of parent                    */
+ I  left;               /* binary tree: index of left  child               */
+ I  right;              /* binary tree: index of right child               */
+ I  order;              /* order number                                    */
+ I  down;               /* predecessor in ordering                         */
+ I  up;                 /* successor   in ordering                         */
+ I  flag;               /* bit flags                                       */
 } SBU;
 
 #define SBC2  1         /* 1 iff 2-byte character                          */
 
 
-typedef struct {
-	AF f1, f2;
-	A f, g, h;
-	I flag, mr, lr, rr, fdep;
-	C id;
-} V;
+typedef struct {AF f1,f2;A f,g,h;I flag,mr,lr,rr,fdep;C id;} V;
 
 #define ID(f)           (f&&FUNC&AT(f)?VAV(f)->id:C0)
-
-/* type V flag values              */
-/* < 256 see vcompsc.c             */
+  
+                                        /* type V flag values              */
+                                        /* < 256 see vcompsc.c             */
 #define VGERL           (I)256          /* gerund left  argument           */
 #define VGERR           (I)512          /* gerund right argument           */
 #define VTAYFINITE      (I)1024         /* t. finite polynomial            */
@@ -376,13 +338,9 @@ typedef struct {
 #define VDDOP           (I)16777216     /* derived from a derived operator */
 
 
-typedef struct {
-	DX re;
-	DX im;
-} ZX;
+typedef struct {DX re;DX im;} ZX;
 
 /* extended complex                                                        */
 /* re - real part                                                          */
 /* im - imaginary part                                                     */
-
 

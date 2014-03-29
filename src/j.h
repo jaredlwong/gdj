@@ -42,7 +42,7 @@
 #endif
 
 #include <math.h>
-#include <string.h>
+#include <string.h>  
 
 
 #if SY_64
@@ -142,7 +142,7 @@
 #define NPP             20              /* max value for quad pp           */
 #define RMAX            IMAX            /* max rank                        */
 #define NPATH           1024            /* max length for path names,      */
-/* including trailing 0 byte       */
+                                        /* including trailing 0 byte       */
 
 #if SY_WINCE
 #define NFCALL          100L            /* wince     named fn call depth   */
@@ -194,7 +194,7 @@
 #define jfloor          jfloor1
 #else
 #define jfloor          floor
-#endif
+#endif          
 
 #define BB              8      /* # bits in a byte */
 #if SY_64
@@ -224,7 +224,7 @@
 #define FCONS(x)        fdef(CFCONS,VERB,jtnum1,jtnum2,0L,0L,(x),0L,RMAX,RMAX,RMAX)
 #define FEQ(u,v)        (ABS((u)-(v))<=jt->fuzz*MAX(ABS(u),ABS(v)))
 #define F1(f)           A f(J jt,    A w)
-#define F2(f)           A f(J jt,A a,A w)
+#define F2(f)           A f(J jt,A a,A w) 
 #define F1RANK(m,f,self)    {RZ(   w); if(m<AR(w)         )R rank1ex(  w,(A)self,(I)m,     f);}
 #define F2RANK(l,r,f,self)  {RZ(a&&w); if(l<AR(a)||r<AR(w))R rank2ex(a,w,(A)self,(I)l,(I)r,f);}
 #define GA(v,t,n,r,s)   RZ(v=ga(t,(I)(n),(I)(r),(I*)(s)))
@@ -306,18 +306,18 @@
 #define BS11    0x0101
 #endif
 
-#include "ja.h"
-#include "jc.h"
-#include "jtype.h"
-#include "jt.h"
+#include "ja.h" 
+#include "jc.h" 
+#include "jtype.h" 
+#include "jt.h" 
 #include "jlib.h"
-#include "je.h"
-#include "jerr.h"
-#include "va.h"
-#include "vq.h"
-#include "vx.h"
+#include "je.h" 
+#include "jerr.h" 
+#include "va.h" 
+#include "vq.h" 
+#include "vx.h" 
 #include "vz.h"
-#include "vdx.h"
+#include "vdx.h"  
 #include "m.h"
 #include "a.h"
 #include "s.h"
@@ -339,11 +339,7 @@ extern J gjt; // global for JPF (procs without jt)
 #define _isnan       isnan
 #define _SW_INVALID  FE_INVALID
 
-static inline UINT _clearfp(void)
-{
-	int r = fetestexcept(FE_ALL_EXCEPT);
-	feclearexcept(FE_ALL_EXCEPT);
-	return r;
+static inline UINT _clearfp(void){int r=fetestexcept(FE_ALL_EXCEPT);
+ feclearexcept(FE_ALL_EXCEPT); return r;
 }
 #endif
-

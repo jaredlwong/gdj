@@ -32,9 +32,8 @@
 #define SSSTEPINTOs 31
 
 
-extern B        jtdbstop(J, DC, I);
-extern DC       jtssnext(J, DC, C);
-extern I        lnumcw(I, A);
+extern B        jtdbstop(J,DC,I);
+extern DC       jtssnext(J,DC,C);
+extern I        lnumcw(I,A);
 extern I        lnumsi(DC);
-
 
