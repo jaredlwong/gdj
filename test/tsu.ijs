@@ -1,6 +1,6 @@
 NB. test script utilities -----------------------------------------------
 
-testpath=: jpath (1!:43''),'/test/' NB. 1!:43 current directory
+NB. testpath=: jpath (1!:43''),'/test/unit/' NB. 1!:43 current directory
 
 NB. 1=#$ testpath  NB. testpath must already be defined as path to tests (with final / or \) before loading tsu.ijs
 NB. 
