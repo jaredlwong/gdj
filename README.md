@@ -16,8 +16,8 @@ Building
 	make build
 	make install
 
-`make build` builds a binary called `jlang` in the directory `build`. And `make
-install` moves `jlang` to the minimal j environment provided in `jenv`.
+`make build` builds a binary called `gdj` in the directory `build`. And `make
+install` moves `gdj` to the minimal j environment provided in `jenv`.
 
 Testing
 -------

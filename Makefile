@@ -12,14 +12,14 @@ TESTS:=$(patsubst test/unit/%,test-%,$(wildcard test/unit/*))
 build:
 	mkdir -p build
 	cd build && cmake ..
-	cd build && make -j4 jlang
+	cd build && make -j4 gdj
 	cd build && make tsdll
 
 install:
-	cp build/jlang jenv/bin
+	cp build/gdj jenv/bin
 #	cp build/libtsdll.so test
 
 test: $(TESTS)
 
 test-%.ijs: test/unit/%.ijs
-	@echo "$(subst FILE,$<,$(TESTSCRIPT))" | jenv/bin/jlang | sed 's/^ \+//'
+	@echo "$(subst FILE,$<,$(TESTSCRIPT))" | jenv/bin/gdj | sed 's/^ \+//'

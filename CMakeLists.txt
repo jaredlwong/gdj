@@ -11,8 +11,8 @@ set (CMAKE_C_FLAGS_DEBUG "-fPIC -O0 -g3 -ggdb -fno-strict-aliasing -DNOASM -D_UN
 file(GLOB SOURCES src/*.c)
 file(GLOB HEADERS src/*.h)
 
-add_executable (jlang ${SOURCES} ${HEADERS})
-target_link_libraries (jlang m dl)
+add_executable (gdj ${SOURCES} ${HEADERS})
+target_link_libraries (gdj m dl)
 
 # add_library (j SHARED ${LIBJ_SOURCES} ${LIBJ_HEADERS})
 # target_link_libraries (j m dl)
