@@ -11,6 +11,11 @@
 #endif
 #include <signal.h>
 #include "j.h"
+
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "jeload.h"
 
 static char **adadbreak;
