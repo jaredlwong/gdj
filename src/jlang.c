@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include "j.h"
 #include "jlib.h"
+
+static char input[30000];
 
 char* Jinput(J jt, char* prompt)
 {
@@ -34,6 +37,6 @@ int main(int argc, char* argv[])
 	while (1) {
 		JDo(jt, Jinput(jt,"   "));
 	}
-	JFree();
+	JFree(jt);
 	return 0;
 }
